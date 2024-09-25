@@ -1,0 +1,20 @@
+#define F 70
+#define LEFT 15
+#define RIGHT 15
+#define LL 2
+#define RR 2
+#define EVADE 90
+
+#define F 250
+#define LEFT 10
+#define RIGHT 10
+#define LL 15
+#define RR 15
+#define EVADE 95
+
+#define F 250
+#define LEFT 1
+#define RIGHT 1
+#define LL 5
+#define RR 5
+#define EVADE 95
