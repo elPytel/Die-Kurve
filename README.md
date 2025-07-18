@@ -1,5 +1,12 @@
 # Semestrální práce z předmětu APO na oboru Kybernetika a Robotika
 
+- [Semestrální práce z předmětu APO na oboru Kybernetika a Robotika](#semestrální-práce-z-předmětu-apo-na-oboru-kybernetika-a-robotika)
+  - [Achtung die Kurve!](#achtung-die-kurve)
+  - [Instalce závislostí](#instalce-závislostí)
+  - [Kompilace](#kompilace)
+  - [Spuštění](#spuštění)
+    - [Ovládání hry](#ovládání-hry)
+
 ## Achtung die Kurve!
 Jde o implementaci hry Achtung die Kurve! v jazyce C pro školní vývojovou desku. Součástí implementace je emulace na PC, kde je možné hru ovládat klávesnicí.
 
