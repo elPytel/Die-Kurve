@@ -40,7 +40,7 @@ int main() {
         menu.speed = 10;
     }
 
-    // nacteni herniho logo
+    // nacteni herniho loga
     unsigned char *img = NULL;
     open_img(logo_file, &img);
     save_logo(img, &game);

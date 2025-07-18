@@ -57,7 +57,9 @@ typedef struct {
 } game_t;
 
 
-// vrati true pokud porad probiha hra
+/*
+ * Returns true if the game is still running.
+ */
 bool playing (game_t * game);
 
 // inicialiuje strukturu game_t
