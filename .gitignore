@@ -1,6 +1,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c,visualstudiocode,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,visualstudiocode,vim
 
+install
+aposem-main
+*.zip
+doc/*
+
 ### C ###
 # Prerequisites
 *.d
