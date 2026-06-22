@@ -1,5 +1,8 @@
 PROJECT_NAME           = "Die Kurve"
 PROJECT_NUMBER         = "1.0"
+INPUT                  = src
+RECURSIVE              = YES
+EXCLUDE                = build
 OUTPUT_DIRECTORY       = ./doc
 OPTIMIZE_OUTPUT_FOR_C  = YES 
 GENERATE_HTML          = YES

@@ -10,15 +10,25 @@
 #include <unistd.h>
 #include <time.h> 
 
+/**
+ * @brief color structure
+ * 
+ * Structure representing a color in RGB format.
+ */
 typedef struct {
-	uint8_t R;
-	uint8_t G;
-	uint8_t B;
+	uint8_t R; /**< red component */
+	uint8_t G; /**< green component */
+	uint8_t B; /**< blue component */
 } color_t;
 
+/**
+ * @brief position structure
+ * 
+ * Structure representing a position in 2D space.
+ */
 typedef struct {
-	int y;
-	int x;
+	int y; /**< y-coordinate */
+	int x; /**< x-coordinate */
 } position_t;
 
 typedef struct {
@@ -57,8 +67,10 @@ typedef struct {
 } game_t;
 
 
-/*
- * Returns true if the game is still running.
+/**
+ * @brief Returns true if the game is still running.
+ * @param game Pointer to the game structure.
+ * @return true if the game is still running, false otherwise.
  */
 bool playing (game_t * game);
 

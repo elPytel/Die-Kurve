@@ -1,5 +1,4 @@
-/*******************************************************************
-
+/**
   font_types.h      - simple bitmap fonts type definition
 
   Simplified font type descriptor based on
@@ -12,10 +11,10 @@
 
   Simplification by Pavel Pisa for Czech Technical University
   Computer Architectures course.
-  
+
   Czech accents added by Pytel.
 
- *******************************************************************/
+ */
 
 #ifndef FONT_TYPES_H
 #define FONT_TYPES_H
@@ -28,19 +27,33 @@ extern "C" {
 
 typedef uint16_t font_bits_t;
 
-/* builtin C-based proportional/fixed font structure*/
+/**
+ * @brief builtin C-based proportional/fixed font structure
+ *
+ * @param name font name
+ * @param maxwidth max width in pixels
+ * @param height height in pixels
+ * @param ascent ascent (baseline) height
+ * @param firstchar first character in bitmap
+ * @param size font size in characters
+ * @param bits 16-bit right-padded bitmap data
+ * @param offset offsets into bitmap data
+ * @param width character widths or 0 if fixed
+ * @param defaultchar default char (not glyph index)
+ * @param bits_size # words of MWIMAGEBITS bits
+ */
 typedef struct {
-        char *                  name;           /* font name*/
-        int                             maxwidth;       /* max width in pixels*/
-        unsigned int    height;         /* height in pixels*/
-        int                             ascent;         /* ascent (baseline) height*/
-        int                             firstchar;      /* first character in bitmap*/
-        int                             size;           /* font size in characters*/
-        const font_bits_t *bits;        /* 16-bit right-padded bitmap data*/
-        const uint32_t  *offset;        /* offsets into bitmap data*/
-        const unsigned char *width;     /* character widths or 0 if fixed*/
-        int                             defaultchar;/* default char (not glyph index)*/
-        int32_t                 bits_size;      /* # words of MWIMAGEBITS bits*/
+    char* name;                 /**< font name*/
+    int maxwidth;               /**< max width in pixels*/
+    unsigned int height;        /**< height in pixels*/
+    int ascent;                 /**< ascent (baseline) height*/
+    int firstchar;              /**< first character in bitmap*/
+    int size;                   /**< font size in characters*/
+    const font_bits_t* bits;    /**< 16-bit right-padded bitmap data*/
+    const uint32_t* offset;     /**< offsets into bitmap data*/
+    const unsigned char* width; /**< character widths or 0 if fixed*/
+    int defaultchar;            /**< default char (not glyph index)*/
+    int32_t bits_size;          /**< # words of MWIMAGEBITS bits*/
 } font_descriptor_t;
 
 extern font_descriptor_t font_rom8x16;
@@ -49,4 +62,4 @@ extern font_descriptor_t font_rom8x16;
 } /* extern "C"*/
 #endif
 
-#endif  /*FONT_TYPES_H*/
+#endif /*FONT_TYPES_H*/

@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
+/**
+ * @brief menu structure
+ * 
+ * Structure representing the languages for the game.
+ */
 typedef enum {
 	EN,
 	CZ,
@@ -79,7 +84,12 @@ typedef struct {
 } menu_t;
 
 
-// podle dat z menu pripravi novou hru
+/**
+ * @brief Prepares a new game based on menu data.
+ * @param menu Pointer to the menu structure.
+ * @param game Pointer to the game structure.
+ * @return true if the game is prepared successfully, false otherwise.
+ */
 bool set_game (menu_t * menu, game_t * game);
 
 // inicializuje menu

@@ -21,7 +21,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 all: install ${BINARIES}
 
 $(BUILD_DIR) $(DOC_DIR):
-	mkdir -p $@
+	@mkdir -p $@
 
 $(BUILD_DIR)/aposem-main: ${OBJS} | ${BUILD_DIR}
 	${CC} ${OBJS} ${LDFLAGS} -o $@

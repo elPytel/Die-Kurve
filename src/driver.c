@@ -84,7 +84,6 @@ bool kill_gui () {
 	return true;
 }
 
-// prevede matici 16b color fromatu na RGB img
 bool render_gui (int w, int h, uint16_t *frame_buffer) {
 	uint16_t pixel = 0;
 	
