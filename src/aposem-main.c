@@ -25,7 +25,7 @@
 int main() {
     // inicializace promenych
     time_t start_time;
-    char *logo_file = "dieKurve.ppm";
+    char *logo_file = "./assets/dieKurve.ppm";
 
     gui_init();  // alokoje a smaze graficky buffer
     game_t game;
