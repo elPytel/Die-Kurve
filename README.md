@@ -19,7 +19,7 @@ Jde o implementaci hry Achtung die Kurve! v jazyce C pro školní vývojovou des
 Před spuštěním projektu je nutné nainstalovat všechny závislosti. To lze provést pomocí následujícího příkazu:
 
 ```bash
-./install_dependencies.sh
+./tools/install_dependencies.sh
 ```
 
 > [!note]
@@ -48,7 +48,7 @@ make run
 
 nebo:
 ```bash
-./aposem-main
+./build/aposem-main
 ```
 
 ### Ovládání hry
