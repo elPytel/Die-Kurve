@@ -10,7 +10,7 @@ Magenta='\033[0;35m'      # Magenta
 Cyan='\033[0;36m'         # Cyan
 NC='\033[0m'    # No Color
 
-$apt_dependencies="dependencies.txt"
+apt_dependencies="dependencies.txt"
 
 # Install apt dependencies
 echo -e "${Cyan}Installing apt dependencies...${NC}"
