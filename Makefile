@@ -1,10 +1,10 @@
 CFLAGS+= -Wall -Werror -std=gnu99 -g 
 LDFLAGS= -lm 
 
-SRC_DIR = src
+SRC_DIR   = src
 BUILD_DIR = build
-TOOLS_DIR=tools
-DOC_DIR=doc
+TOOLS_DIR = tools
+DOC_DIR   = doc
 
 HW=aposem
 BINARIES = $(BUILD_DIR)/aposem-main
@@ -13,7 +13,7 @@ CFLAGS+=$(shell sdl2-config --cflags)
 LDFLAGS+=$(shell sdl2-config --libs)
 
 # Seznam vsech objektovych souboru vygenerovanych ze zdrojaku .c
-SRCS=$(wildcard ${SRC_DIR}/*.c)
+SRCS = $(wildcard ${SRC_DIR}/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 .PHONY: all docs zip clean run help
@@ -42,8 +42,8 @@ zip:
 	@echo "Created ${HW}-brute.zip"
 
 clean:
-	rm -f ${BINARIES} ${OBJS} install
-	rm -f ${HW}-brute.zip
+	rm -f  install
+	rm -f  ${HW}-brute.zip
 	rm -rf ${DOC_DIR}
 	rm -rf ${BUILD_DIR}
 

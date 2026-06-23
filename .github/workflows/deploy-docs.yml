@@ -1,0 +1,48 @@
+name: Deploy Doxygen to GitHub Pages
+
+# Manuální spouštění z webového rozhraní GitHubu
+on:
+  workflow_dispatch:
+
+# Nastavení oprávnění pro bezpečný zápis do GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Zamezí souběžnému zápisu, pokud bys kliknul na tlačítko dvakrát rychle za sebou
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Generate documentation
+        run: |
+          make docs
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Doxygen standardně generuje do tvé složky doc/html
+      - name: Upload documentation artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'doc/html'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
