@@ -1,4 +1,4 @@
-/*
+/**
  * File name: aposem-main.c
  * Date:      2020/06/02
  * Author:    Jaroslav Körner, Kateřina Poláková
@@ -50,22 +50,36 @@ int main() {
     save_logo(img, &game);
     free(img);
 
-    // nekonecna smycka ve ktere stale beha program
+    // Game loop
     while (true != false) {
-        // menu
-        render_logo(game.logo);
-        menu_function(&menu, &game);
+        menu.start = false;
+        menu.item = 0;
+        while (!menu.start) {
+            frame_start = SDL_GetTicks();
 
+            pool_events();
+            menu_function(&menu, &game);
+
+            // --- SYSTÉM REGULACE FPS (ZÁMEK NA 60 FPS) ---
+            // Spočítáme, jak dlouho trval samotný výpočet a vykreslení snímku
+            frame_time = SDL_GetTicks() - frame_start;
+            // Pokud byl výpočet rychlejší než 16.66 ms, zbytek času prospíme
+            if (frame_time < TARGET_FRAME_TIME) {
+                SDL_Delay(TARGET_FRAME_TIME - frame_time);
+            }
+            
+            printf("[FPS Lock] Vypočteno za: %d ms | Celkový čas snímku: %d ms\n", frame_time, SDL_GetTicks() - frame_start);
+        }
         // nastaveni hernich parametru podle dat z menu
         set_game(&menu, &game);
-
-        // herni smycka
         while (playing(&game)) {
+            printf("Game is running...\n");
+            frame_start = SDL_GetTicks();
+            pool_events();
+
             if (DEBUG) {
                 printf("New turn.\n");
             }
-
-            frame_start = SDL_GetTicks();
 
             // aktualizace vektrou
             // AI
@@ -83,7 +97,6 @@ int main() {
             // --- SYSTÉM REGULACE FPS (ZÁMEK NA 60 FPS) ---
             // Spočítáme, jak dlouho trval samotný výpočet a vykreslení snímku
             frame_time = SDL_GetTicks() - frame_start;
-
             // Pokud byl výpočet rychlejší než 16.66 ms, zbytek času prospíme
             if (frame_time < TARGET_FRAME_TIME) {
                 SDL_Delay(TARGET_FRAME_TIME - frame_time);
@@ -91,15 +104,23 @@ int main() {
             
             printf("[FPS Lock] Vypočteno za: %d ms | Celkový čas snímku: %d ms\n", frame_time, SDL_GetTicks() - frame_start);
         }
-        // vypsani skore po skonceni hry
-        score_bord(&menu, &game);
-        render_score_bord(&menu, &game);
+        
+        frame_start = SDL_GetTicks();
+        while (true) {
+            pool_events();
+            score_bord(&menu, &game);
 
-        if (getchar() == 'q') {
-            break;
-        }
-        if (DEBUG) {
-            menu.restart = false;
+
+            render_score_bord(&menu, &game);
+            render_gui(WIDTH, HEIGHT, game.frame_buffer);
+
+            if (DEBUG) {
+                menu.restart = false;
+            }
+            SDL_Delay(20);
+            if (frame_start + 5000 < SDL_GetTicks()) {
+                break;
+            }
         }
     }
     kill_gui();

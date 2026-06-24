@@ -14,6 +14,16 @@
 
 #include "game.h"
 
+typedef struct {
+    uint8_t encoder_w0; // Stav enkodéru 0 (DF) - rozsah 0-255
+    uint8_t encoder_w1; // Stav enkodéru 1 (JK) - rozsah 0-255
+} board_t;
+
+/**
+ * @brief Polls SDL events to update the virtual rotary encoder positions based on keyboard input.
+ */
+void pool_events ();
+
 /**
  * @brief Sets the position of the rotary encoder.
  * @param number The encoder number (0-2).
