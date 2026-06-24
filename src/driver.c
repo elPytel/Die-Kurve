@@ -1,44 +1,51 @@
 // by Pytel
 
+#include <SDL2/SDL.h>
 #include "driver.h"
 
 #define DEBUG 1
 
 bool wheel_position(int number, uint8_t *degree) {
-	Call_termios(0);
-	int uhel = *degree+256;
-	char c = getchar();
-	Call_termios(1);
-	if (number == 0) {
-		if ( c == 'd' ) {
-			uhel -= 30;
-		} else if ( c == 'f' ) {
-			uhel += 30;
-		}
-	} else if (number == 1) {
-		if ( c == 'j' ) {
-			uhel -= 30;
-		} else if ( c == 'k' ) {
-			uhel += 30;
-		}
-	}
-	*degree = uhel%256;
-	if (DEBUG) {
-		printf("Uhel: %d\n", *degree);
-	}
-	/*
-	int uhel = -1;
-	printf("Enter new angle: ");
-	if (scanf ("%d", &uhel) != 1) {
-		printf("ERROR: wrong input!\r\n");
-		return false;
-	} else if ( uhel <= 360 && uhel >= 0) {
-		*degree = uhel;
-		return true;
-	} else {
-		printf("ERROR: invlaid angle!\r\n");
-	}*/
-	return true;
+	SDL_Event event;    
+    int uhel = *degree;
+
+    while (SDL_PollEvent(&event)) {
+        // Pokud uživatel klikne na křížek okna, hru korektně ukončíme
+        if (event.type == SDL_QUIT) {
+            kill_gui();
+            exit(0);
+        }
+
+        // Pokud došlo ke stisku klávesy
+        if (event.type == SDL_KEYDOWN) {
+            SDL_Keycode key = event.key.keysym.sym;
+
+            if (number == 0) {
+                if (key == SDLK_d) {
+                    uhel -= 30;
+                } else if (key == SDLK_f) {
+                    uhel += 30;
+                }
+            } 
+            
+            if (number == 1) {
+                if (key == SDLK_j) {
+                    uhel -= 30;
+                } else if (key == SDLK_k) {
+                    uhel += 30;
+                }
+            }
+        }
+    }
+
+    // Ošetření přetečení/podtečení úhlu (zajištění rozsahu 0-255)
+    *degree = (uhel + 256) % 256;
+
+    if (DEBUG && (uhel != *degree)) { // Vypíše debug zprávu pouze při změně
+        printf("Hrac %d novy uhel: %d\n", number, *degree);
+    }
+
+    return true;
 }
 
 bool RGB_LED (int number, color_t color) {

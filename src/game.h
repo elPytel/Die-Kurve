@@ -31,19 +31,29 @@ typedef struct {
 	int x; /**< x-coordinate */
 } position_t;
 
+/**
+ * @brief player structure
+ * 
+ * Structure representing a player in the game.
+ */
 typedef struct {
-	bool enable;	// ucastni se hry
-	bool alive;		// still not dead
-	// barva
+	bool enable;	/**< ucastni se hry */
+	bool alive;		/**< still not dead */
+	// color
 	int color_index;
 	uint16_t color;
 	// pozice
 	position_t position;
-	// vektor		- posun v osach X a Y
-	position_t vector;
+	// vektor
+	position_t vector; /**< movement in x and y directions */
 	position_t old_vector;
 } player_t;
 
+/**
+ * @brief game structure
+ * 
+ * Structure representing the game state.
+ */
 typedef struct {
 	bool playing;
 	// hraci
@@ -86,8 +96,10 @@ void AI_move (game_t * game);
 // aktualizuje vektor hrace
 void player_move (game_t * game);
 
-/* skontroluje validitu tahu
- * vyhodnoti mrtve hrace a udeli jim body, posune zive ve smeru vektoru
+/**
+ * @brief Checks the validity of a move.
+ * Evaluate points for dead players and bots and updates the game state for alive players.
+ * @param game Pointer to the game structure.
  */
 void valid_play(game_t * game);
 

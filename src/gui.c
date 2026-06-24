@@ -63,216 +63,135 @@ char?
 0x61 = 97 => a
 0x30 = cisla
 */
-unsigned char* translate(char *string) {
-	unsigned char *translated = NULL;
-	int len = 0;
-	// ASERT
-	if ( string && ( len = strlen(string) )>0 ) {
-		translated = (unsigned char*) malloc ( (len+1) *sizeof(unsigned char) );
-		//printf("Aloc = %ld\n", strlen(string)+1);
-	} else {
-		printf("ERROR, invalid string to translate!\n");
-		return NULL;
-	}
-	// inicializace
-	char c = 0;
-	char ch = 0;
-	int index1 = -1;
-	int index2 = -1;
-	//printf(" index1 = %d < strlen(string) = %d ?", index1, len);
-	while ( index1 < len ) {	//(int)strlen(string)
-		index1++;
-		index2++;
-		//printf("\n index1 = %d	index2 = %d	", index1, index2);
-		// latinka
-		c = string[index1];
-		if ( ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == ' ' || ('0' <= c && c <= '9') ) {
-			//printf(" c = %c	", c);
-			translated[index2] = 97+c-'a';
-		} else {	// ceska abeceda
-			//printf(" ch = %d	", c);
-			switch(c) {
-				case -59:
-					index1++;
-					ch = string[index1];
-					//printf(" ch = %d	", ch);
-					switch (ch) {
-						case -66:	// ž
-							translated[index2] = 0x98;
-							break;
-						case -67:	// Ž
-							translated[index2] = 0xa7;
-							break;
-						case -81:	// ů
-							translated[index2] = 0x90;
-							break;
-						case -82:	// Ů
-							translated[index2] = 0x9f;
-							break;
-						case -91:	// ť
-							translated[index2] = 0x96;
-							break;
-						case -92:	// Ť
-							translated[index2] = 0xa5;
-							break;
-						case -95:	// š
-							translated[index2] = 0x93;
-							//printf(" c = š	");
-							break;
-						case -96:	// Š
-							translated[index2] = 0xa2;
-							break;
-						case -103:	// ř
-							translated[index2] = 0x92;
-							break;
-						case -104:	// Ř
-							translated[index2] = 0xa1;
-							break;
-						case -120:	// ň
-							translated[index2] = 0x97;
-							break;
-						case -121:	// Ň
-							translated[index2] = 0xa6;
-							break;
-						// nemecka psismenka
-						case -72:	// Ÿ
-							translated[index2] = 0x84;		// je pouze male
-							break;
-						default:
-							break;
-					} // swtich2 end
-					break;
-				case -60:
-					index1++;
-					ch = string[index1];
-					switch (ch) {
-						case -101:	// ě
-							translated[index2] = 0x91;
-							break;
-						case -102:	// Ě
-							translated[index2] = 0xa0;
-							break;
-						case -113:	// ď
-							translated[index2] = 0x95;
-							break;
-						case -114:	// Ď
-							translated[index2] = 0xa4;
-							break;
-						case -115:	// č
-							translated[index2] = 0x94;
-							break;
-						case -116:	// Č
-							translated[index2] = 0xa3;
-							break;
-						default:
-							break;
-					} // swtich2 end
-					break;
-				case -61:
-					index1++;
-					ch = string[index1];
-					//printf(" ch = %d	", ch);
-					switch (ch) {
-						case -67:	// ý
-							translated[index2] = 0x8d;
-							break;
-						case -70:	// ú
-							translated[index2] = 0x8f;
-							break;
-						case -77:	// ó
-							translated[index2] = 0x8e;
-							//printf(" c = ó	");
-							break;
-						case -83:	// í
-							translated[index2] = 0x8c;
-							break;
-						case -87:	// é
-							translated[index2] = 0x8b;
-							break;
-						case -95:	// á
-							translated[index2] = 0x8a;
-							break;
-						case -99:	// Ý
-							translated[index2] = 0x9c;
-							break;
-						case -102:	// Ú
-							translated[index2] = 0x9e;
-							break;
-						case -109:	// Ó
-							translated[index2] = 0x9d;
-							break;
-						case -115:	// Í
-							translated[index2] = 0x9b;
-							break;
-						case -119:	// É
-							translated[index2] = 0x9a;
-							break;
-						case -127:	// Á
-							translated[index2] = 0x99;
-							break;
-						// nemecka psismenka	
-						case -65:	// ÿ
-							translated[index2] = 0x84;
-							break;
-						case -68:	// ü
-							translated[index2] = 0x86;
-							break;
-						case -74:	// ö
-							translated[index2] = 0x85;
-							break;
-						case -81:	// ï
-							translated[index2] = 0x83;
-							break;
-						case -85:	// ë
-							translated[index2] = 0x82;
-							break;
-						case -92:	// ä
-							translated[index2] = 0x81;
-							break;
-						case -100:	// Ü
-							translated[index2] = 0x89;
-							break;
-						case -106:	// Ö
-							translated[index2] = 0x88;
-							break;
-						case -113:	// Ï
-							translated[index2] = 0x83;		// je pouze male
-							break;
-						case -117:	// Ë
-							translated[index2] = 0x82;		// je pouze male
-							break;
-						case -124:	// Ä
-							translated[index2] = 0x87;
-							break;
-						default:
-							break;
-					} // swtich2 end
-					break;
-				default:
-					translated[index2] = c;
-					break;
-			} // switch1 end
-		} // else end
-	}
-	
-	// ukonceni
-	if ( index2 < len ) {
-		index2++;
-		translated[index2] = '\0';
-	} else {
-		translated[index2] = '\0';
-	}
-	
-	
-	return translated;
+unsigned char* translate(const char *string) {
+    unsigned char *translated = NULL;
+    int len = 0;
+
+    if (string && (len = strlen(string)) > 0) {
+        // Alokujeme raději dostatek paměti, reálně se text zkrátí
+        translated = (unsigned char*) malloc((len + 1) * sizeof(unsigned char));
+    } else {
+        fprintf(stderr, "ERROR, invalid string to translate!\n");
+        return NULL;
+    }
+
+    int index_in = 0; // Index čtení ze vstupu
+    int index_out = 0; // Index zápisu do výstupu
+
+    while (index_in < len) {
+        char c = string[index_in];
+
+        // Standardní ASCII (latinka, čísla, mezery, interpunkce) - zapisujeme 1:1
+        if ((unsigned char)c < 128) {
+            translated[index_out++] = c; 
+            index_in++;
+        } else { // Vícebajtové UTF-8 znaky (Česká a německá abeceda)
+            char ch = string[index_in + 1]; // Podíváme se na druhý bajt
+
+            switch(c) {
+                case -59: // 0xC5
+                    switch (ch) {
+                        case -66:  translated[index_out++] = 0x98; break; // ž
+                        case -67:  translated[index_out++] = 0xa7; break; // Ž
+                        case -81:  translated[index_out++] = 0x90; break; // ů
+                        case -82:  translated[index_out++] = 0x9f; break; // Ů
+                        case -91:  translated[index_out++] = 0x96; break; // ť
+                        case -92:  translated[index_out++] = 0xa5; break; // Ť
+                        case -95:  translated[index_out++] = 0x93; break; // š
+                        case -96:  translated[index_out++] = 0xa2; break; // Š
+                        case -103: translated[index_out++] = 0x92; break; // ř
+                        case -104: translated[index_out++] = 0xa1; break; // Ř
+                        case -120: translated[index_out++] = 0x97; break; // ň
+                        case -121: translated[index_out++] = 0xa6; break; // Ň
+                        case -72:  translated[index_out++] = 0x84; break; // Ÿ
+                        default:   translated[index_out++] = '?';  break; // Neznámý znak
+                    }
+                    index_in += 2; // Posuneme se o oba zpracované bajty UTF-8
+                    break;
+
+                case -60: // 0xC4
+                    switch (ch) {
+                        case -101: translated[index_out++] = 0x91; break; // ě
+                        case -102: translated[index_out++] = 0xa0; break; // Ě
+                        case -113: translated[index_out++] = 0x95; break; // ď
+                        case -114: translated[index_out++] = 0xa4; break; // Ď
+                        case -115: translated[index_out++] = 0x94; break; // č
+                        case -116: translated[index_out++] = 0xa3; break; // Č
+                        default:   translated[index_out++] = '?';  break;
+                    }
+                    index_in += 2;
+                    break;
+
+                case -61: // 0xC3
+                    switch (ch) {
+                        case -67:  translated[index_out++] = 0x8d; break; // ý
+                        case -70:  translated[index_out++] = 0x8f; break; // ú
+                        case -77:  translated[index_out++] = 0x8e; break; // ó
+                        case -83:  translated[index_out++] = 0x8c; break; // í
+                        case -87:  translated[index_out++] = 0x8b; break; // é
+                        case -95:  translated[index_out++] = 0x95; break; // á
+                        case -99:  translated[index_out++] = 0x9c; break; // Ý
+                        case -102: translated[index_out++] = 0x9e; break; // Ú
+                        case -109: translated[index_out++] = 0x9d; break; // Ó
+                        case -115: translated[index_out++] = 0x9b; break; // Í
+                        case -119: translated[index_out++] = 0x9a; break; // É
+                        case -127: translated[index_out++] = 0x99; break; // Á
+                        case -65:  translated[index_out++] = 0x84; break; // ÿ
+                        case -68:  translated[index_out++] = 0x86; break; // ü
+                        case -74:  translated[index_out++] = 0x85; break; // ö
+                        case -81:  translated[index_out++] = 0x83; break; // ï
+                        case -85:  translated[index_out++] = 0x82; break; // ë
+                        case -92:  translated[index_out++] = 0x81; break; // ä
+                        case -100: translated[index_out++] = 0x89; break; // Ü
+                        case -106: translated[index_out++] = 0x88; break; // Ö
+                        case -113: translated[index_out++] = 0x83; break; // Ï
+                        case -117: translated[index_out++] = 0x82; break; // Ë
+                        case -124: translated[index_out++] = 0x87; break; // Ä
+                        default:   translated[index_out++] = '?';  break;
+                    }
+                    index_in += 2;
+                    break;
+
+                default:
+                    // Záchrana pro jiné neočekávané vícebajtové znaky
+                    translated[index_out++] = c;
+                    index_in++;
+                    break;
+            }
+        }
+    }
+
+    // Bezpečné ukončení řetězce přesně tam, kam se reálně dokreslil
+    translated[index_out] = '\0';
+    return translated;
 }
 
 // NEW
-void print (menu_t *menu, game_t * game, char * string, int * y, int * x, int size, int color_index) {
+void print (menu_t *menu, game_t * game, const char * string, int * y, int * x, int size, int color_index) {
 	int i = 0;
 	unsigned char c = 0;
 	unsigned char *translated = NULL;
-	translated = translate(string);
+
+	if (string == NULL) return;
+
+	bool requires_translation = false;
+    for (int i = 0; string[i] != '\0'; i++) {
+        if ((unsigned char)string[i] > 127) {
+            requires_translation = true;
+            break;
+        }
+    }
+
+	if (requires_translation) {
+		translated = translate(string);
+	} else {
+		translated = (unsigned char*) malloc((strlen(string) + 1) * sizeof(unsigned char));
+		if (translated == NULL) {
+			fprintf(stderr, "ERROR: cannot allocate memory for translated string!\n");
+			return;
+		}
+		strcpy((char*)translated, string);
+	}
 	
 	if (translated != NULL) {
 		while ( (c = translated[i]) != '\0') {
@@ -284,18 +203,6 @@ void print (menu_t *menu, game_t * game, char * string, int * y, int * x, int si
 		free(translated);
 	}
 }
-
-
-/*
-void print (menu_t *menu, game_t * game, char * string, int * y, int * x, int size, int color_index) {
-	int i = 0;
-	char c;
-	while ( (c = string[i]) != '\0') {
-		i++;
-		print_char (menu, game, *y, *x, c, size, color_index);
-		*x+=8*size;
-	}
-}*/
 
 char * num_to_str (int integer) {
 	char * string;
@@ -330,136 +237,138 @@ bool render_game (game_t * game) {
 }
 
 bool render_menu (menu_t *menu, game_t * game) {
-	// set background
-	if (!game->logo) {
-		printf("ERROR: logo ptr == NULL !\n");
-	}
-	if ( game->frame_buffer == NULL ) {
-		game->frame_buffer = (uint16_t*) malloc ( WIDTH*HEIGHT * sizeof(uint16_t) );
-		if (DEBUG && game->frame_buffer) {
-			printf("DEBUG: game->frame_buffer uspesne alokovana!\n");
-		}
-	}
-	// kopirovani loga
-	for (int i = 0; i < HEIGHT*WIDTH; i++) {
-		game->frame_buffer[i] = game->logo[i];
-	}
-	
-	// init
-	int size = menu->size;
-	int y, x;
-	// base position
-	if ( size == 1) {
-		y = 110;	// +8
-		x = 130; 	// +16
-	} else {
-		y = 97;		// +8
-		x = 50; 	// +16	
-	}
-	int row = y;
-	int col = x;
-	int height = font_rom8x16.height;	// 16
-	int width = font_rom8x16.maxwidth;	//  8
-	
-	for (int i = 0; i < NBR_ITEM; i++) {
-		
-		// posun textu
-		if ( size > 1 && i == 0) {
-			if ( menu->item > 4 ) {
-				row -= 2*height*size;
-			} else if (menu->item > 3 ) {
-				row -= height*size;
-			}
-		}
-		
-		// vybrany prvek menu => sipka
-		if ( i == menu->item && row >= 0 && row < HEIGHT) {
-			print_char (menu, game, row, col, 175, size, YELLOW);
-		} 
-		col+=2*width*size;
-		
-		// textovy popisek
-		char *string = menu->item_names[i+menu->language*NBR_ITEM];
-		if ( row >= y) {			// text neni pod logem
-			print (menu, game, string, &row, &col, size, WHITE);
-		}
-		// X vyber polozky za dvojteckou
-		if ( i == menu->item) {
-			col+=width*size;
-			print_char (menu, game, row, col, 0x3a, size, GREY);
-			col+=width*size;
-		} else {
-			col+=width*size;
-			col+=width*size;
-		}
-		col+=width*size;
-		
-		// sub menu
-		if ( row >= y) {			// text neni pod logem
-			switch (i) {
-				case LANGUAGE:
-					string = menu->languages[menu->language];
-					print (menu, game, string, &row, &col, size, WHITE);
-					break;
-				case TEXT_SIZE:
-					col+=width*size;
-					print_char (menu, game, row, col, 0x30 + menu->size, size, WHITE);
-					col+=width*size;
-					break;
-				case NUMBER_OF_PLAYERS:
-					col+=width*size;
-					print_char (menu, game, row, col, 0x30 + game->players, size, WHITE);
-					col+=width*size;
-					break;
-				case PLAYER:
-					col+=width*size;
-					print_char (menu, game, row, col, 0x30 + menu->selected_player+1, size, WHITE);
-					col+=width*size;
-					break;
-				case COLOR:
-					if (menu->selected_player == 0) {
-						string = menu->color_names[game->player1.color_index+menu->language*NBR_COLOR];
-						print (menu, game, string, &row, &col, size, game->player1.color_index);
-					} else if (menu->selected_player == 1) {
-						string = menu->color_names[game->player2.color_index+menu->language*NBR_COLOR];
-						print (menu, game, string, &row, &col, size, game->player2.color_index);
-					} else if (menu->selected_player == 2) {
-						string = menu->color_names[game->player3.color_index+menu->language*NBR_COLOR];
-						print (menu, game, string, &row, &col, size, game->player3.color_index);
-					}
-					break;
-				case NUMBER_OF_BOTS:
-					string =num_to_str (game->bots);
-					print (menu, game, string, &row, &col, size, WHITE);
-					break;
-				case DIFFICULTY:
-					string = num_to_str (menu->speed);
-					print (menu, game, string, &row, &col, size, WHITE);
-					break;
-				case RESTART:
-					if (menu->restart == 1) {
-						print (menu, game, menu->words[TRUE+menu->language*NBR_WORD], &row, &col, size, GREEN);
-					} else {
-						print (menu, game, menu->words[FALSE+menu->language*NBR_WORD], &row, &col, size, RED);
-					}
-					break;
-				case START:
-					col+=2*width*size;
-					if (menu->start == 1) {
-						print (menu, game, menu->words[TRUE+menu->language*NBR_WORD], &row, &col, size, GREEN);
-					} else {
-						print (menu, game, menu->words[FALSE+menu->language*NBR_WORD], &row, &col, size, RED);
-					}
-					break;
-				
-			}
-		}
-		// novy radek
-		row+=height*size;
-		col = x;
-	}
-	render_gui(WIDTH, HEIGHT, game->frame_buffer);
-	return true;
+    // set background
+    if (!game->logo) {
+        printf("ERROR: logo ptr == NULL !\n");
+    }
+    if ( game->frame_buffer == NULL ) {
+        game->frame_buffer = (uint16_t*) malloc ( WIDTH*HEIGHT * sizeof(uint16_t) );
+        if (DEBUG && game->frame_buffer) {
+            printf("DEBUG: game->frame_buffer uspesne alokovana!\n");
+        }
+    }
+    // kopirovani loga
+    for (int i = 0; i < HEIGHT*WIDTH; i++) {
+        game->frame_buffer[i] = game->logo[i];
+    }
+    
+    // init
+    int size = menu->size;
+    int y, x;
+    // base position
+    if ( size == 1) {
+        y = 110;    // +8
+        x = 130;    // +16
+    } else {
+        y = 97;     // +8
+        x = 50;     // +16  
+    }
+    int row = y;
+    int col = x;
+    int height = font_rom8x16.height;   // 16
+    int width = font_rom8x16.maxwidth;  //  8
+    
+    for (int i = 0; i < NBR_ITEM; i++) {
+        
+        // posun textu
+        if ( size > 1 && i == 0) {
+            if ( menu->item > 4 ) {
+                row -= 2*height*size;
+            } else if (menu->item > 3 ) {
+                row -= height*size;
+            }
+        }
+        
+        // vybrany prvek menu => sipka
+        if ( i == menu->item && row >= 0 && row < HEIGHT) {
+            print_char (menu, game, row, col, 175, size, YELLOW);
+        } 
+        col+=2*width*size;
+        
+        // OPRAVA: změněno na const char*, Row-Major 2D indexování
+        const char *string = menu->item_names[i * NBR_LANGUAGE + menu->language];
+        if ( row >= y) {            // text neni pod logem
+            print (menu, game, string, &row, &col, size, WHITE);
+        }
+        // X vyber polozky za dvojteckou
+        if ( i == menu->item) {
+            col+=width*size;
+            print_char (menu, game, row, col, 0x3a, size, GREY);
+            col+=width*size;
+        } else {
+            col+=width*size;
+            col+=width*size;
+        }
+        col+=width*size;
+        
+        // sub menu
+        if ( row >= y) {            // text neni pod logem
+            switch (i) {
+                case LANGUAGE:
+                    string = menu->languages[menu->language];
+                    print (menu, game, string, &row, &col, size, WHITE);
+                    break;
+                case TEXT_SIZE:
+                    col+=width*size;
+                    print_char (menu, game, row, col, 0x30 + menu->size, size, WHITE);
+                    col+=width*size;
+                    break;
+                case NUMBER_OF_PLAYERS:
+                    col+=width*size;
+                    print_char (menu, game, row, col, 0x30 + game->players, size, WHITE);
+                    col+=width*size;
+                    break;
+                case PLAYER:
+                    col+=width*size;
+                    print_char (menu, game, row, col, 0x30 + menu->selected_player+1, size, WHITE);
+                    col+=width*size;
+                    break;
+                case COLOR:
+                    // OPRAVA: Indexování jmen barev na Row-Major formát podle vybraného hráče
+                    if (menu->selected_player == 0) {
+                        string = menu->color_names[game->player1.color_index * NBR_LANGUAGE + menu->language];
+                        print (menu, game, string, &row, &col, size, game->player1.color_index);
+                    } else if (menu->selected_player == 1) {
+                        string = menu->color_names[game->player2.color_index * NBR_LANGUAGE + menu->language];
+                        print (menu, game, string, &row, &col, size, game->player2.color_index);
+                    } else if (menu->selected_player == 2) {
+                        string = menu->color_names[game->player3.color_index * NBR_LANGUAGE + menu->language];
+                        print (menu, game, string, &row, &col, size, game->player3.color_index);
+                    }
+                    break;
+                case NUMBER_OF_BOTS:
+                    string = num_to_str (game->bots);
+                    print (menu, game, string, &row, &col, size, WHITE);
+                    break;
+                case DIFFICULTY:
+                    string = num_to_str (menu->speed);
+                    print (menu, game, string, &row, &col, size, WHITE);
+                    break;
+                case RESTART:
+                    if (menu->restart == 1) {
+                        print(menu, game, menu->words[TRUE_STR * NBR_LANGUAGE + menu->language], &row, &col, size, GREEN);
+                    } else {
+                        print(menu, game, menu->words[FALSE_STR * NBR_LANGUAGE + menu->language], &row, &col, size, RED);
+                    }
+                    break;
+                case START:
+                    col+=2*width*size;
+                    if (menu->start == 1) {
+                        print(menu, game, menu->words[TRUE_STR * NBR_LANGUAGE + menu->language], &row, &col, size, GREEN);
+                    } else {
+                        print(menu, game, menu->words[FALSE_STR * NBR_LANGUAGE + menu->language], &row, &col, size, RED);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        // novy radek
+        row+=height*size;
+        col = x;
+    }
+    render_gui(WIDTH, HEIGHT, game->frame_buffer);
+    return true;
 }
 
 void render_score_bord (menu_t *menu, game_t * game) {
@@ -571,7 +480,7 @@ void render_score_bord (menu_t *menu, game_t * game) {
 			y+=height*size;
 		}
 		if ( y > -height*size && y < HEIGHT+height) {
-			print (menu, game, menu->words[CONTINUE+menu->language*NBR_WORD], &y, &x, size, YELLOW);
+			print(menu, game, menu->words[CONTINUE+menu->language*NBR_WORD], &y, &x, size, YELLOW);
 		}
 		render_gui(WIDTH, HEIGHT, game->frame_buffer);
 	}	// konec while
@@ -579,70 +488,87 @@ void render_score_bord (menu_t *menu, game_t * game) {
 }
 
 //--- Terminal ----------------------------------------------------------------
-
 void print_menu(menu_t *menu, game_t * game) {
-	if (DEBUG) {
-		//printf("Die Kurve : menu\n");
-		for (int i = 0; i < NBR_ITEM; i++) {
-			printf("	");
-			
-			// vybrany prvek menu
-			printf("[");
-			if ( i == menu->item) {
-				printf("x");
-			} else {
-				printf(" ");
-			}
-			printf("]");
-			
-			// textovy popisek
-			printf(" %s", menu->item_names[i+menu->language*NBR_ITEM]);
-			// X vyber polozky za dvojteckou
-			if ( i == menu->item) {
-				printf(" : ");
-			} else {
-				printf("	");
-			}
-			// sub menu
-			switch (i) {
-				case LANGUAGE:
-					printf(" %s", menu->languages[menu->language]);
-					break;
-				case TEXT_SIZE:
-					printf(" %d", menu->size);
-					break;
-				case NUMBER_OF_PLAYERS:
-					printf(" %d", game->players);
-					break;
-				case PLAYER:
-					printf(" %d", menu->selected_player+1);
-					break;
-				case COLOR:
-					if (menu->selected_player == 0) {
-						printf(" %s", menu->color_names[game->player1.color_index+menu->language*NBR_COLOR]);
-					} else if (menu->selected_player == 1) {
-						printf(" %s", menu->color_names[game->player2.color_index+menu->language*NBR_COLOR]);
-					} else if (menu->selected_player == 2) {
-						printf(" %s", menu->color_names[game->player3.color_index+menu->language*NBR_COLOR]);
-					}
-					break;
-				case NUMBER_OF_BOTS:
-					printf(" %d", game->bots);
-					break;
-				case DIFFICULTY:
-					printf(" %d", menu->speed);
-					break;
-				case RESTART:
-					printf(" %s", menu->restart == 1 ? "true" : "false");
-					break;
-				case START:
-					printf(" %s", menu->start == 1 ? "true" : "false");
-					break;
-				
-			}
-			printf("\n");
-		}
-	}
+    if (DEBUG) {
+        // Vyčistíme obrazovku terminálu před každým překreslením (volitelné, ale dělá to hezké CLI)
+        // printf("\033[H\033[J"); 
+        
+        printf("\n=== Die Kurve : Menu ===\n\n");
+        for (int i = 0; i < NBR_ITEM; i++) {
+            printf("    ");
+            
+            // Vybraný prvek menu (kurzor)
+            printf("[");
+            if (i == menu->item) {
+                printf("x");
+            } else {
+                printf(" ");
+            }
+            printf("]");
+            
+            // 1. OPRAVA: Textový popisek položky (Row-Major indexace 2D pole)
+            printf(" %s", menu->item_names[i * NBR_LANGUAGE + menu->language]);
+            
+            // Výběr položky za dvojtečkou
+            if (i == menu->item) {
+                printf(" : ");
+            } else {
+                printf("    ");
+            }
+            
+            // Sub-menu (hodnoty napravo)
+            switch (i) {
+                case LANGUAGE:
+                    // Pole jazyků je jednorozměrné (flat), přístup je přímý
+                    printf(" %s", menu->languages[menu->language]);
+                    break;
+                case TEXT_SIZE:
+                    printf(" %d", menu->size);
+                    break;
+                case NUMBER_OF_PLAYERS:
+                    printf(" %d", game->players);
+                    break;
+                case PLAYER:
+                    printf(" %d", menu->selected_player + 1);
+                    break;
+                case COLOR:
+                    // 2. OPRAVA: Indexování jmen barev na Row-Major formát
+                    if (menu->selected_player == 0) {
+                        printf(" %s", menu->color_names[game->player1.color_index * NBR_LANGUAGE + menu->language]);
+                    } else if (menu->selected_player == 1) {
+                        printf(" %s", menu->color_names[game->player2.color_index * NBR_LANGUAGE + menu->language]);
+                    } else if (menu->selected_player == 2) {
+                        printf(" %s", menu->color_names[game->player3.color_index * NBR_LANGUAGE + menu->language]);
+                    }
+                    break;
+                case NUMBER_OF_BOTS:
+                    printf(" %d", game->bots);
+                    break;
+                case DIFFICULTY:
+                    printf(" %d", menu->speed);
+                    break;
+                case RESTART:
+                    // 3. VYLEPŠENÍ: Propojení lokalizovaných slov TRUE_STR / FALSE_STR místo hardcoded řetězců
+                    if (menu->restart) {
+                        printf(" %s", menu->words[TRUE_STR * NBR_LANGUAGE + menu->language]);
+                    } else {
+                        printf(" %s", menu->words[FALSE_STR * NBR_LANGUAGE + menu->language]);
+                    }
+                    break;
+                case START:
+                    // 4. VYLEPŠENÍ: Propojení lokalizovaných slov i pro stav startu
+                    if (menu->start) {
+                        printf(" %s", menu->words[TRUE_STR * NBR_LANGUAGE + menu->language]);
+                    } else {
+                        printf(" %s", menu->words[FALSE_STR * NBR_LANGUAGE + menu->language]);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            printf("\n");
+        }
+    }
 }
 
 void score_bord (menu_t *menu, game_t * game) {
@@ -755,25 +681,5 @@ bool save_logo (unsigned char *img, game_t *game) {
 	}
 	return true;
 }
-
-/*
- [ ] 
- [x] 
- 	
-	//printf("\033[1J");		// clear
-	//printf("\033[H");		// go home!
-	
-	printf("Font size: %d\n", font_rom8x16.size); 
-	int x = 60, y = 70, index = 175, size = 2;
-	//open_img("dieKurve.ppm", &game->img);
-	int ;
-	print_char (game, y, x, index, size);
-	xwin_redraw(WIDTH, HEIGHT, game->img);
-	
-	while ( getchar() != 'q') {
-		getline(&line, &n, fd);
-		printf("%s", line);
-	}
-*/
 
 /* end of gui.c */

@@ -12,15 +12,36 @@
 #include "game.h"
 
 bool render_game (game_t * game);
+
+/**
+ * @brief Renders the menu on the display in text mode.
+ * @param menu Pointer to the menu structure.
+ * @param game Pointer to the game structure.
+ * @return true if rendering was successful, false otherwise.
+ */
 bool render_menu (menu_t *menu, game_t * game);
 void render_score_bord (menu_t *menu, game_t * game);
 void render_logo (uint16_t * img);
 
-/* Vypise na displey v textovem rezimu menu
- *
+/**
+ * @brief Translates a string to the appropriate character encoding for display.
+ * @param string The input string to be translated.
+ * @return A pointer to the translated string, or NULL if the input is empty.
+ */
+unsigned char* translate(const char *string);
+
+/**
+ * @brief Prints the menu on the display in text mode.
+ * @param menu Pointer to the menu structure.
+ * @param game Pointer to the game structure.
  */
 void print_menu(menu_t *menu, game_t * game);
 
+/**
+ * @brief Prints the score board on the display in text mode.
+ * @param menu Pointer to the menu structure.
+ * @param game Pointer to the game structure.
+ */
 void score_bord(menu_t *menu, game_t * game);
 
 // RGB to 16b color

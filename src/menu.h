@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "game.h"
+
 /**
  * @brief menu structure
  * 
@@ -22,8 +24,8 @@ typedef enum {
 } languages_t;
 
 typedef enum {
-	TRUE,
-	FALSE,
+	TRUE_STR,
+	FALSE_STR,
 	PLAYERI,
 	BOT,
 	SCORE,
@@ -56,8 +58,6 @@ typedef enum {
 	NBR_COLOR
 } color_name_t;
 
-#include "game.h"
-
 typedef struct {
 	bool start;
 	bool restart;
@@ -69,8 +69,8 @@ typedef struct {
 	uint8_t new_positon_w1;
 	// polozka
 	sub_menu_t item;
-	char **item_names;
-	char **color_names;
+	const char **item_names;
+	const char **color_names;
 	color_t *colors;
 	int step;
 	int selected_player;
@@ -78,8 +78,8 @@ typedef struct {
 	int speed;
 	// jazyky
 	int language;
-	char **languages;
-	char **words;
+	const char **languages;
+	const char **words;
 	int size;
 } menu_t;
 
@@ -92,12 +92,21 @@ typedef struct {
  */
 bool set_game (menu_t * menu, game_t * game);
 
-// inicializuje menu
+/**
+ * @brief Inicializuje výchozí hodnoty menu.
+ * @param menu Ukazatel na strukturu menu.
+ * @return true při úspěchu, false při chybě.
+ */
 bool menu_init (menu_t * menu);
 
+/**
+ * @brief Spustí a odbaví logiku menu (vykreslení, reakce na enkodéry).
+ */
 void menu_function (menu_t * menu, game_t * game);
 
-// dekonstruktor
+/**
+ * @brief Destruktor menu, uvolní alokované resources (barvy).
+ */
 void kill_menu (menu_t * menu);
 
 
