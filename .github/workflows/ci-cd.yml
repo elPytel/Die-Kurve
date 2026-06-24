@@ -1,22 +1,22 @@
-name: Deploy Doxygen to GitHub Pages
+name: C/C++ CI/CD Pipeline
 
-# Manuální spouštění z webového rozhraní GitHubu
 on:
-  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# Nastavení oprávnění pro bezpečný zápis do GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Zamezí souběžnému zápisu, pokud bys kliknul na tlačítko dvakrát rychle za sebou
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build-test-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,24 +25,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 1. Krok: Nainstalujeme všechny závislosti naráz (testy i dokumentaci)
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y doxygen graphviz
+          make install
 
+      # 2. Krok: Spustíme unit testy pod Valgrindem. Pokud make test vrátí kód 1, Actions se stopnou.
+      - name: Run Purist Automated Tests & Valgrind
+        run: |
+          make test
+
+      # 3. Krok: Generování Doxygenu (spustí se jen když testy projdou)
       - name: Generate documentation
         run: |
           make docs
 
+      # 4. Krok: Příprava a nahrání artefaktů na GitHub Pages
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
-      # Doxygen standardně generuje do tvé složky doc/html
+      # Doxygen generuje do doc/html
       - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'doc/html'
 
+      # 5. Krok: Samotný deploy na web
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
