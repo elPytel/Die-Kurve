@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 
 #include "driver.h"
 #include "game.h"
@@ -20,11 +21,14 @@
 #define OK 1
 #define NOK -1
 
+#define TARGET_FRAME_TIME 16 /**< Target frame time in milliseconds ~ 60fps */
+
 // - main ---------------------------------------------------------------------
 
 int main() {
     // inicializace promenych
-    time_t start_time;
+    uint32_t frame_start;
+    int frame_time;
     char *logo_file = "./assets/dieKurve.ppm";
 
     gui_init();  // alokoje a smaze graficky buffer
@@ -61,7 +65,7 @@ int main() {
                 printf("New turn.\n");
             }
 
-            time(&start_time);
+            frame_start = SDL_GetTicks();
 
             // aktualizace vektrou
             // AI
@@ -76,13 +80,16 @@ int main() {
             // vykresleni obrazu
             render_game(&game);
 
-            // casovani
-            // sleep(1);
-            printf(" Start time: %ld\n",
-                   start_time);  // vraci hodnotu pouze v sekundach, najit lepsi jemnejsi zpusob
-            printf(" Executed in: %ld sec\n", time(NULL) - start_time);
-            usleep(game.speed - (time(NULL) - start_time));
-            // usleep(50000);
+            // --- SYSTÉM REGULACE FPS (ZÁMEK NA 60 FPS) ---
+            // Spočítáme, jak dlouho trval samotný výpočet a vykreslení snímku
+            frame_time = SDL_GetTicks() - frame_start;
+
+            // Pokud byl výpočet rychlejší než 16.66 ms, zbytek času prospíme
+            if (frame_time < TARGET_FRAME_TIME) {
+                SDL_Delay(TARGET_FRAME_TIME - frame_time);
+            }
+            
+            printf("[FPS Lock] Vypočteno za: %d ms | Celkový čas snímku: %d ms\n", frame_time, SDL_GetTicks() - frame_start);
         }
         // vypsani skore po skonceni hry
         score_bord(&menu, &game);
@@ -100,8 +107,5 @@ int main() {
     kill_game_all(&game);
     return OK;
 }
-
-/*
- */
 
 /* end of aposem-main.c */
