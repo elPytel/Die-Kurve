@@ -1,5 +1,6 @@
 libsdl2-dev
 libsdl2-image-dev
+valgrind
 doxygen 
 doxygen-gui
 graphviz

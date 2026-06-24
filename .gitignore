@@ -5,6 +5,7 @@ install
 aposem-main
 *.zip
 doc/*
+build/*
 
 ### C ###
 # Prerequisites

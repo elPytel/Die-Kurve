@@ -7,6 +7,7 @@
   - [Spuštění](#spuštění)
     - [Ovládání hry](#ovládání-hry)
   - [Cíle makefile](#cíle-makefile)
+    - [Testování](#testování)
     - [Dokumentace](#dokumentace)
 
 ## Achtung die Kurve!
@@ -70,11 +71,34 @@ Usage: make [target]
 Targets:
   all       - Build the project and install dependencies
   install   - Install dependencies
+  test      - Run the test suite under Valgrind
   docs      - Generate documentation using Doxygen
   zip       - Create a zip archive of the project
   clean     - Remove build artifacts and documentation
   run       - Build and run the project
   help      - Show this help message
+```
+
+### Testování
+
+Pro testování se používají `assert` makra. Testy jsou umístěny ve složce `tests`. Pro spuštění testů použijte následující příkaz:
+
+```bash
+make test
+```
+
+Bashový skript `generate_tests.sh` generuje test runner, který je následně kompilován spolu s testy a spouštěn pod Valgrindem pro detekci paměťových chyb.
+
+Ukázka výstupu po úspěšném spuštění testů:
+```bash
+=== Running Purist Automated Test Suite ===
+
+Running test_translate_ascii...                       [ PASSED ]
+Running test_translate_diacritics...                  [ PASSED ]
+Running test_translate_empty...                       [ PASSED ]
+
+--------------------------------------------------
+SUCCESS! All 3 tests passed cleanly.
 ```
 
 ### Dokumentace
