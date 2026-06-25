@@ -30,7 +30,7 @@ void pool_events ();
  * @param degree Pointer to the variable to store the rotation angle.
  * @return true if successful, false otherwise.
  */
-bool wheel_position(int number, uint8_t *degree);	// , bool *press
+bool encoder_position(int number, uint8_t *degree);	// , bool *press
 
 /**
  * @brief Turns on the RGB LED at the specified position.

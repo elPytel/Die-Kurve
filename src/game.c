@@ -6,7 +6,9 @@
 
 #define DEBUG 1
 
-bool playing (game_t * game) { return game->playing; }
+#define MAX_PLAYERS 3
+
+bool game_playing (game_t * game) { return game->playing; }
 
 void player_init (player_t *player) {
 	player->enable = false;
@@ -213,7 +215,7 @@ bool next_step (game_t *game, int *x1, int *y1, int *x2, int *y2, int *x3, int *
 	return true;
 }
 
-void AI_move (game_t * game) {
+void game_AI_move (game_t * game) {
 	// kazdy bot
 	for (int i = 0; i < game->bots; i++) {
 		if (game->live_bots[i]) {	// dany bot je na zivu
@@ -332,7 +334,7 @@ void player_move (game_t * game) {
 		// TODO
 		// PC demo
 		degree = old_degree;
-		wheel_position(0, &degree);
+		encoder_position(0, &degree);
 		old_degree = degree;
 		game->player1.old_vector.y = game->player1.vector.y;
 		game->player1.old_vector.x = game->player1.vector.x;
@@ -349,12 +351,12 @@ void player_move (game_t * game) {
 	}
 	if ( game->players > 2 && game->player2.alive == true) {
 		// nastaveni noveho vektoru
-		wheel_position(1, &degree);
+		encoder_position(1, &degree);
 		degree_to_vector ((int)degree, &game->player2.vector.y, &game->player2.vector.x);
 	}
 	if ( game->players > 3 && game->player3.alive == true) {
 		// nastaveni noveho vektoru
-		wheel_position(2, &degree);
+		encoder_position(2, &degree);
 		degree_to_vector ((int)degree, &game->player3.vector.y, &game->player3.vector.x);
 	}
 }
@@ -423,7 +425,7 @@ bool player_invalid_move (int direction, uint16_t pixel1, uint16_t pixel2, uint1
 	return ret;
 }
 
-void valid_play (game_t * game) {
+void game_validate_play (game_t * game) {
 	// promene
 	uint16_t pixel1 = 0;
 	uint16_t pixel2 = 0;
@@ -471,7 +473,7 @@ void valid_play (game_t * game) {
 		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
 			// umrel dostane skore
 			game->player1.alive = false;
-			game->score[0] += make_score(game);
+			game->score[0] += game_make_score(game);
 		} else {
 			pixel1 = game->game_bord[y1*WIDTH +x1];
 			pixel2 = game->game_bord[y2*WIDTH +x2];
@@ -482,7 +484,7 @@ void valid_play (game_t * game) {
 		}
 		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player1.color) ) {		// obsazene pole
 			game->player1.alive = false;
-			game->score[0] += make_score(game);	
+			game->score[0] += game_make_score(game);	
 		} else {
 			// zahral tah
 			game->game_bord[y1*WIDTH +x1] = game->player1.color;
@@ -517,7 +519,7 @@ void valid_play (game_t * game) {
 		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
 			// umrel dostane skore
 			game->player2.alive = false;
-			game->score[1] += make_score(game);
+			game->score[1] += game_make_score(game);
 		} else {
 			pixel1 = game->game_bord[y1*WIDTH +x1];
 			pixel2 = game->game_bord[y2*WIDTH +x2];
@@ -528,7 +530,7 @@ void valid_play (game_t * game) {
 		}
 		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player2.color) ) {		// obsazene pole
 			game->player2.alive = false;
-			game->score[1] += make_score(game);	
+			game->score[1] += game_make_score(game);	
 		} else {
 			// zahral tah
 			game->game_bord[y1*WIDTH +x1] = game->player2.color;
@@ -563,7 +565,7 @@ void valid_play (game_t * game) {
 		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
 			// umrel dostane skore
 			game->player3.alive = false;
-			game->score[2] += make_score(game);
+			game->score[2] += game_make_score(game);
 		} else {
 			pixel1 = game->game_bord[y1*WIDTH +x1];
 			pixel2 = game->game_bord[y2*WIDTH +x2];
@@ -574,7 +576,7 @@ void valid_play (game_t * game) {
 		}
 		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player3.color) ) {		// obsazene pole
 			game->player3.alive = false;
-			game->score[2] += make_score(game);	
+			game->score[2] += game_make_score(game);	
 		} else {
 			// zahral tah
 			game->game_bord[y1*WIDTH +x1] = game->player3.color;
@@ -598,7 +600,7 @@ void valid_play (game_t * game) {
 			// validity
 			if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
 				game->live_bots[i] = false;
-				game->score[i+game->players] = game->score[i+game->players] + make_score(game);
+				game->score[i+game->players] = game->score[i+game->players] + game_make_score(game);
 			} else {
 				pixel1 = game->game_bord[y1*WIDTH +x1];
 				pixel2 = game->game_bord[y2*WIDTH +x2];
@@ -606,7 +608,7 @@ void valid_play (game_t * game) {
 			}
 			if ( pixel1 != 0 || (pixel2 != 0 && pixel2 != game->colors[i]) || (pixel3 != 0 && pixel3 != game->colors[i]) ) {	// obsazene pole
 				game->live_bots[i] = false;
-				game->score[i+game->players] = game->score[i+game->players] + make_score(game);	
+				game->score[i+game->players] = game->score[i+game->players] + game_make_score(game);	
 			} else {
 				// zahral tah
 				game->game_bord[y1*WIDTH +x1] = game->colors[i];
@@ -619,14 +621,14 @@ void valid_play (game_t * game) {
 	}
 	
 	// zije jeste nekdo?
-	someon_alive (game);
+	game_is_someon_alive (game);
 	
-	if (DEBUG && !playing (game) ) {
+	if (DEBUG && !game_playing (game) ) {
 		printf("Everybody's dead dave!\n");
 	}
 }
 
-void someon_alive (game_t * game) {
+void game_is_someon_alive (game_t * game) {
 	game->playing = false;
 	
 	// hraci
@@ -648,7 +650,7 @@ void someon_alive (game_t * game) {
 	}
 }
 
-int make_score(game_t * game) {
+int game_make_score(game_t * game) {
 	// spocita kolik je mrtvych hracu a botu a tu hodnotu vrati
 	int score = 0;
 	// hraci
@@ -671,7 +673,7 @@ int make_score(game_t * game) {
 	return score;
 }
 
-void free_game (game_t * game) {
+void game_free (game_t * game) {
 	if (game->positions) {
 		free(game->positions);
 		game->positions = NULL;
@@ -706,8 +708,8 @@ void free_game (game_t * game) {
 	}
 }
 
-void kill_game_all (game_t * game) {
-	free_game (game);
+void game_kill_all (game_t * game) {
+	game_free (game);
 	if (game->frame_buffer) {
 		free(game->frame_buffer);
 		game->frame_buffer = NULL;

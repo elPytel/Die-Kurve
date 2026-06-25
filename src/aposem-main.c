@@ -72,7 +72,7 @@ int main() {
         }
         // nastaveni hernich parametru podle dat z menu
         set_game(&menu, &game);
-        while (playing(&game)) {
+        while (game_playing(&game)) {
             printf("Game is running...\n");
             frame_start = SDL_GetTicks();
             pool_events();
@@ -83,13 +83,13 @@ int main() {
 
             // aktualizace vektrou
             // AI
-            AI_move(&game);
+            game_AI_move(&game);
             // hrac
             player_move(&game);
 
             // vyhodnoceni tahu
             // AI i hrace
-            valid_play(&game);
+            game_validate_play(&game);
 
             // vykresleni obrazu
             render_game(&game);
@@ -125,7 +125,7 @@ int main() {
     }
     kill_gui();
     kill_menu(&menu);
-    kill_game_all(&game);
+    game_kill_all(&game);
     return OK;
 }
 

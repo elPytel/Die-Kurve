@@ -140,8 +140,8 @@ void X_menu_position (menu_t * menu) {
 void menu_function (menu_t * menu, game_t * game) {
     bool restart = false;
 	menu->x_shift = 0;
-	wheel_position(0, &menu->new_positon_w0);
-	wheel_position(1, &menu->new_positon_w1);
+	encoder_position(0, &menu->new_positon_w0);
+	encoder_position(1, &menu->new_positon_w1);
 	
 	Y_menu_position(menu);
 	X_menu_position(menu);
@@ -239,7 +239,7 @@ bool set_game (menu_t * menu, game_t * game) {
 	
 	// random nastaveni botu
 	if ( menu->restart || game->score == NULL ) {
-		free_game (game);
+		game_free (game);
 		game->positions = (position_t*) malloc ( game->bots*sizeof(position_t) );
 		game->vectors = (position_t*) malloc ( game->bots*sizeof(position_t) );
 		game->colors = (uint16_t*) malloc ( game->bots*sizeof(uint16_t) );

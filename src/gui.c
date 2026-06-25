@@ -411,7 +411,7 @@ void render_score_bord (menu_t *menu, game_t * game) {
     }
     
     // posun
-    wheel_position(0, &menu->new_positon_w0);
+    encoder_position(0, &menu->new_positon_w0);
     
     // posun Y
     unsigned char delta = (menu->new_positon_w0 - menu->last_positon_w0 + 255) % 255;

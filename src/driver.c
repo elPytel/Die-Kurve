@@ -43,8 +43,8 @@ void pool_events () {
     virtual_board.encoder_w1 = (uhel_w1 + 256) % 256;
 }
 
-bool wheel_position(int number, uint8_t *degree) {
-    uint8_t stara_hodnota = *degree;
+bool encoder_position(int number, uint8_t *degree) {
+    uint8_t last_degree = *degree;
 
     if (number == 0) {
         *degree = virtual_board.encoder_w0;
@@ -54,7 +54,7 @@ bool wheel_position(int number, uint8_t *degree) {
         return false; // Neplatné číslo enkodéru
     }
 
-    if (DEBUG && (stara_hodnota != *degree)) {
+    if (DEBUG && (last_degree != *degree)) {
         printf("DEBUG Hardware -> Enkodér %d změnil úhel na: %d\n", number, *degree);
     }
 

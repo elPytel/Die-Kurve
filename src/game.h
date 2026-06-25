@@ -69,10 +69,10 @@ typedef struct {
 	bool *live_bots;
 	int *directions;
 	int *score;			// [players+bots] pole, ktere drzi skore pro kazdeho hrace i bota
-	int *spaces;	// cerchovany mod
-	int speed;		// turn time
-	uint16_t *game_bord;	// veskera herni plocha - aka frame buffer
+	int *spaces;		// cerchovany mod
+	int speed;			// turn time
 	uint16_t *logo;			// zde je nahrane herni logo
+	uint16_t *game_bord;	// veskera herni plocha - aka frame buffer
 	uint16_t *frame_buffer;	// frame buffer pro vice vrstva meny
 } game_t;
 
@@ -82,16 +82,19 @@ typedef struct {
  * @param game Pointer to the game structure.
  * @return true if the game is still running, false otherwise.
  */
-bool playing (game_t * game);
+bool game_playing (game_t * game);
 
 // inicialiuje strukturu game_t
 bool game_init (game_t * game);
 
-// nastavi hodnotu playning na true pokud existuje zivy hrac/bot
-void someon_alive (game_t * game);
+/**
+ * @brief Checks if any player or bot is still alive and updates the game state accordingly.
+ * @param game Pointer to the game structure.
+ */
+void game_is_someon_alive (game_t * game);
 
 // aktualizuje vektro bota
-void AI_move (game_t * game);
+void game_AI_move (game_t * game);
 
 // aktualizuje vektor hrace
 void player_move (game_t * game);
@@ -101,14 +104,14 @@ void player_move (game_t * game);
  * Evaluate points for dead players and bots and updates the game state for alive players.
  * @param game Pointer to the game structure.
  */
-void valid_play(game_t * game);
+void game_validate_play(game_t * game);
 
-int make_score(game_t * game);
+int game_make_score(game_t * game);
 
 // dekonstruktor
-void free_game (game_t * game);
+void game_free (game_t * game);
 
-void kill_game_all (game_t * game);
+void game_kill_all (game_t * game);
 
 // po vyjeti z menu na polozku start se zahaji hra s nastavenymi parametry.
 
