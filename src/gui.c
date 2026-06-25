@@ -375,116 +375,112 @@ void render_score_bord (menu_t *menu, game_t * game) {
 	// projde pres vsechny hrace a boty a vypise jejich score
 	int size = menu->size;
 	int position = 0;
-	int shift = (game->bots+game->players)/2;	//3;	//
-	int index = (game->bots+game->players) - shift;		//  - shift
+    int shift = (game->bots+game->players)/2;
+    int index = (game->bots+game->players) - shift;
 	char *string = NULL;
 	int height = font_rom8x16.height;	// 16
 	int width = font_rom8x16.maxwidth;	//  8
 	
 	printf("Defoult posun: %d	index: %d/%d\n", position, index, game->bots+game->players);
-	while (index != 0) {
-		// display
-		for (int i = 0; i < HEIGHT*WIDTH; i++) {
-			game->frame_buffer[i] = game->game_bord[i];
-		}
-		
-		int row, col;
-		// base position
-		if ( size == 1) {
-			row = 68-(shift*height*size)/2;	// +8
-			col = 160; 	// +16
-		} else {
-			row = 68-(shift*height*size)/2;	// +8
-			col = 110; 	// +16	
-		}
-		int y = row;
-		int x = col;
-		
-		// arow
-		print_char (menu, game, 68+(shift*height*size)/2, x-1.5*width*size, 175, size, RED);
-		
-		// TODO
-		// 32 LEDek
-		if (index > 0) {
-			LED_stripe (game->score[game->bots+game->players-index]);
-		} else {
-			LED_stripe (0);
-		}
-		
-		// posun
-		wheel_position(0, &menu->new_positon_w0);
-		
-		// posun Y
-		unsigned char delta = (menu->new_positon_w0 - menu->last_positon_w0 + 255) % 255;
-		if (delta < 255/2 && delta > menu->step) { 				// down
-			menu->last_positon_w0 = menu->new_positon_w0;
-			if ( index < game->bots+game->players ) {		
-				//position+=delta;
-				position+=16*size;
-			}
-		} else if (delta > 255/2 && 255-delta > menu->step) {	// up
-			menu->last_positon_w0 = menu->new_positon_w0;
-			//if ( index > 0) {
-				//position-=255-delta;
-				position-=16*size;
-			//}
-		}
-		y += position; 
-		index = game->bots+game->players -shift + position/(height*size);
-		printf("Posun: %d	index: %d/%d\n", position, index, game->bots+game->players);
-		
-		if ( game->players > 0 && game->player1.enable == true ) {
-			if ( y > -height*size) {			// text je mimo obraz
-				print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player1.color_index);
-				print (menu, game, "1", &y, &x, size, WHITE);
-				print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-				string = num_to_str (game->score[0]);
-				print (menu, game, string, &y, &x, size, WHITE);
-				x = col;
-			}
-			y+=height*size;
-		}
-		if ( game->players > 2 && game->player2.enable == true ) {
-			if ( y > -height*size) {
-				print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player2.color_index);
-				print (menu, game, "2", &y, &x, size, WHITE);
-				print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-				string = num_to_str (game->score[1]);
-				print (menu, game, string, &y, &x, size, WHITE);
-				x = col;
-			}
-			y+=height*size;
-		}
-		if ( game->players > 3 && game->player3.enable == true ) {
-			if ( y > -height*size) {
-				print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player3.color_index);
-				print (menu, game, "3", &y, &x, size, WHITE);
-				print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-				string = num_to_str (game->score[2]);
-				print (menu, game, string, &y, &x, size, WHITE);
-				x = col;
-			}
-			y+=height*size;
-		}
-		// boti
-		for (int i = 0; i < game->bots; i++) {
-			if ( y > -height*size) {
-				print (menu, game, menu->words[BOT+menu->language*NBR_WORD], &y, &x, size, WHITE);
-				string = num_to_str (i+1);
-				print (menu, game, string, &y, &x, size, WHITE);
-				print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-				string = num_to_str (game->score[i+game->players]);
-				print (menu, game, string, &y, &x, size, WHITE);
-				x = col;
-			}
-			y+=height*size;
-		}
-		if ( y > -height*size && y < HEIGHT+height) {
-			print(menu, game, menu->words[CONTINUE+menu->language*NBR_WORD], &y, &x, size, YELLOW);
-		}
-		render_gui(WIDTH, HEIGHT, game->frame_buffer);
-	}	// konec while
-	sleep(1);
+    // display
+    for (int i = 0; i < HEIGHT*WIDTH; i++) {
+        game->frame_buffer[i] = game->game_bord[i];
+    }
+    
+    int row, col;
+    // base position
+    if ( size == 1) {
+        row = 68-(shift*height*size)/2;	// +8
+        col = 160; 	// +16
+    } else {
+        row = 68-(shift*height*size)/2;	// +8
+        col = 110; 	// +16	
+    }
+    int y = row;
+    int x = col;
+    
+    // arow
+    print_char (menu, game, 68+(shift*height*size)/2, x-1.5*width*size, 175, size, RED);
+    
+    // TODO
+    // 32 LEDek
+    if (index > 0) {
+        LED_stripe (game->score[game->bots+game->players-index]);
+    } else {
+        LED_stripe (0);
+    }
+    
+    // posun
+    wheel_position(0, &menu->new_positon_w0);
+    
+    // posun Y
+    unsigned char delta = (menu->new_positon_w0 - menu->last_positon_w0 + 255) % 255;
+    if (delta < 255/2 && delta > menu->step) { 				// down
+        menu->last_positon_w0 = menu->new_positon_w0;
+        if ( index < game->bots+game->players ) {		
+            //position+=delta;
+            position+=16*size;
+        }
+    } else if (delta > 255/2 && 255-delta > menu->step) {	// up
+        menu->last_positon_w0 = menu->new_positon_w0;
+        //if ( index > 0) {
+            //position-=255-delta;
+            position-=16*size;
+        //}
+    }
+    y += position; 
+    index = game->bots+game->players -shift + position/(height*size);
+    printf("Posun: %d	index: %d/%d\n", position, index, game->bots+game->players);
+    
+    if ( game->players > 0 && game->player1.enable == true ) {
+        if ( y > -height*size) {			// text je mimo obraz
+            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player1.color_index);
+            print (menu, game, "1", &y, &x, size, WHITE);
+            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
+            string = num_to_str (game->score[0]);
+            print (menu, game, string, &y, &x, size, WHITE);
+            x = col;
+        }
+        y+=height*size;
+    }
+    if ( game->players > 2 && game->player2.enable == true ) {
+        if ( y > -height*size) {
+            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player2.color_index);
+            print (menu, game, "2", &y, &x, size, WHITE);
+            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
+            string = num_to_str (game->score[1]);
+            print (menu, game, string, &y, &x, size, WHITE);
+            x = col;
+        }
+        y+=height*size;
+    }
+    if ( game->players > 3 && game->player3.enable == true ) {
+        if ( y > -height*size) {
+            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player3.color_index);
+            print (menu, game, "3", &y, &x, size, WHITE);
+            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
+            string = num_to_str (game->score[2]);
+            print (menu, game, string, &y, &x, size, WHITE);
+            x = col;
+        }
+        y+=height*size;
+    }
+    // boti
+    for (int i = 0; i < game->bots; i++) {
+        if ( y > -height*size) {
+            print (menu, game, menu->words[BOT+menu->language*NBR_WORD], &y, &x, size, WHITE);
+            string = num_to_str (i+1);
+            print (menu, game, string, &y, &x, size, WHITE);
+            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
+            string = num_to_str (game->score[i+game->players]);
+            print (menu, game, string, &y, &x, size, WHITE);
+            x = col;
+        }
+        y+=height*size;
+    }
+    if ( y > -height*size && y < HEIGHT+height) {
+        print(menu, game, menu->words[CONTINUE+menu->language*NBR_WORD], &y, &x, size, YELLOW);
+    }
 }
 
 //--- Terminal ----------------------------------------------------------------

@@ -5,49 +5,61 @@
 
 #define DEBUG 1
 
-bool wheel_position(int number, uint8_t *degree) {
-	SDL_Event event;    
-    int uhel = *degree;
+static board_t virtual_board = { .encoder_w0 = 0, .encoder_w1 = 0 };
+
+void pool_events () {
+	SDL_Event event;
+    // Dočasné int proměnné, aby správně fungovalo sčítání/odčítání před modulo operací
+    int uhel_w0 = virtual_board.encoder_w0;
+    int uhel_w1 = virtual_board.encoder_w1;
 
     while (SDL_PollEvent(&event)) {
-        // Pokud uživatel klikne na křížek okna, hru korektně ukončíme
         if (event.type == SDL_QUIT) {
             kill_gui();
             exit(0);
         }
 
-        // Pokud došlo ke stisku klávesy
         if (event.type == SDL_KEYDOWN) {
             SDL_Keycode key = event.key.keysym.sym;
 
-            if (number == 0) {
-                if (key == SDLK_d) {
-                    uhel -= 30;
-                } else if (key == SDLK_f) {
-                    uhel += 30;
-                }
-            } 
+            // Enkodér 0 (DF)
+            if (key == SDLK_d) {
+                uhel_w0 -= 30;
+            } else if (key == SDLK_f) {
+                uhel_w0 += 30;
+            }
             
-            if (number == 1) {
-                if (key == SDLK_j) {
-                    uhel -= 30;
-                } else if (key == SDLK_k) {
-                    uhel += 30;
-                }
+            // Enkodér 1 (JK)
+            if (key == SDLK_j) {
+                uhel_w1 -= 30;
+            } else if (key == SDLK_k) {
+                uhel_w1 += 30;
             }
         }
     }
 
-    // Ošetření přetečení/podtečení úhlu (zajištění rozsahu 0-255)
-    *degree = (uhel + 256) % 256;
+    // Uložíme ošetřené hodnoty (rozsah 0-255) zpět do struktury desky
+    virtual_board.encoder_w0 = (uhel_w0 + 256) % 256;
+    virtual_board.encoder_w1 = (uhel_w1 + 256) % 256;
+}
 
-    if (DEBUG && (uhel != *degree)) { // Vypíše debug zprávu pouze při změně
-        printf("Hrac %d novy uhel: %d\n", number, *degree);
+bool wheel_position(int number, uint8_t *degree) {
+    uint8_t stara_hodnota = *degree;
+
+    if (number == 0) {
+        *degree = virtual_board.encoder_w0;
+    } else if (number == 1) {
+        *degree = virtual_board.encoder_w1;
+    } else {
+        return false; // Neplatné číslo enkodéru
+    }
+
+    if (DEBUG && (stara_hodnota != *degree)) {
+        printf("DEBUG Hardware -> Enkodér %d změnil úhel na: %d\n", number, *degree);
     }
 
     return true;
 }
-
 bool RGB_LED (int number, color_t color) {
 	if (number > 2) {
 		return false;

@@ -139,105 +139,98 @@ void X_menu_position (menu_t * menu) {
 }
 void menu_function (menu_t * menu, game_t * game) {
     bool restart = false;
-    menu->start = false;
-    menu->item = 0;
-    
-    wheel_position(0, &menu->last_positon_w0);
-    wheel_position(1, &menu->last_positon_w1);
-    
-    while (!menu->start) {
-        menu->x_shift = 0;
-        wheel_position(0, &menu->new_positon_w0);
-        wheel_position(1, &menu->new_positon_w1);
-        
-        Y_menu_position(menu);
-        X_menu_position(menu);
-        
-        // Obsluha periferií podle vybraného hráče
-        if (menu->selected_player < game->players && game->score != NULL) {
-            // Zjednodušená bezpečná obsluha LED pro hráče 0, 1, 2
-            int color_idx = (menu->selected_player == 0) ? game->player1.color_index :
-                            (menu->selected_player == 1) ? game->player2.color_index : 
-                                                           game->player3.color_index;
-            RGB_LED(0, menu->colors[color_idx]);
-            LED_stripe(game->score[menu->selected_player == 0 ? 0 : 2]); // Ponecháno původní větvení indexů score
-        }
-        
-        switch (menu->item) {
-            case LANGUAGE:
-                if (menu->x_shift == 1 && menu->language < NBR_LANGUAGE-1) {
-                    menu->language = menu->language + 1;
-                } else if (menu->x_shift == -1 && menu->language > 0) {
-                    menu->language = menu->language - 1;
-                }
-                break;
-            case TEXT_SIZE:
-                if (menu->x_shift == 1 && menu->size < 2) {
-                    menu->size = menu->size + 1;
-                } else if (menu->x_shift == -1 && menu->size > 1) {
-                    menu->size = menu->size - 1;
-                }
-                break;
-            case NUMBER_OF_PLAYERS:
-                if (menu->x_shift == 1 && game->players < 3) {
-                    game->players = game->players + 1;
-                    restart = true;
-                } else if (menu->x_shift == -1 && game->players > 0) {
-                    game->players = game->players - 1;
-                    restart = true;
-                }
-                break;
-            case PLAYER:
-                if (menu->x_shift == 1 && menu->selected_player < game->players-1) {
-                    menu->selected_player = menu->selected_player + 1;
-                } else if (menu->x_shift == -1 && menu->selected_player > 0) {
-                    menu->selected_player = menu->selected_player - 1;
-                }
-                break;
-            case COLOR:
-                if (menu->selected_player == 0) {
-                    choose_color(&game->player1.color_index, menu->x_shift);
-                } else if (menu->selected_player == 1) {
-                    choose_color(&game->player2.color_index, menu->x_shift);
-                } else if (menu->selected_player == 2) {
-                    choose_color(&game->player3.color_index, menu->x_shift);
-                }
-                break;
-            case NUMBER_OF_BOTS:
-                if (menu->x_shift == 1 && game->bots < MAX_BOTS) {
-                    game->bots = game->bots + 1;
-                    restart = true;
-                } else if (menu->x_shift == -1 && game->bots > 0) {
-                    game->bots = game->bots - 1;
-                    restart = true;
-                }
-                break;
-            case DIFFICULTY:
-                if (menu->x_shift == 1 && (SLOWEST-(menu->speed*SPEED_STEP) > FASTEST) ) {
-                    menu->speed = menu->speed + 1;
-                } else if (menu->x_shift == -1 && (SLOWEST-(menu->speed*SPEED_STEP) < SLOWEST) ) {
-                    menu->speed = menu->speed - 1;
-                }
-                break;
-            case RESTART:
-                if (menu->x_shift == 1)       menu->restart = true;
-                else if (menu->x_shift == -1) menu->restart = false;
-                break;
-            case START:
-                if (menu->x_shift) menu->start = true;
-                break;
-            default:
-                break;
-        }
-        
-        print_menu(menu, game);
-        render_menu(menu, game);
-        
-        if (menu->start == true) {
-            sleep(1);
-        }
-    }
-    menu->restart = menu->restart | restart;
+	menu->x_shift = 0;
+	wheel_position(0, &menu->new_positon_w0);
+	wheel_position(1, &menu->new_positon_w1);
+	
+	Y_menu_position(menu);
+	X_menu_position(menu);
+	
+	// Obsluha periferií podle vybraného hráče
+	if (menu->selected_player < game->players && game->score != NULL) {
+		// Zjednodušená bezpečná obsluha LED pro hráče 0, 1, 2
+		int color_idx = (menu->selected_player == 0) ? game->player1.color_index :
+						(menu->selected_player == 1) ? game->player2.color_index : 
+														game->player3.color_index;
+		RGB_LED(0, menu->colors[color_idx]);
+		LED_stripe(game->score[menu->selected_player == 0 ? 0 : 2]); // Ponecháno původní větvení indexů score
+	}
+	
+	switch (menu->item) {
+		case LANGUAGE:
+			if (menu->x_shift == 1 && menu->language < NBR_LANGUAGE-1) {
+				menu->language = menu->language + 1;
+			} else if (menu->x_shift == -1 && menu->language > 0) {
+				menu->language = menu->language - 1;
+			}
+			break;
+		case TEXT_SIZE:
+			if (menu->x_shift == 1 && menu->size < 2) {
+				menu->size = menu->size + 1;
+			} else if (menu->x_shift == -1 && menu->size > 1) {
+				menu->size = menu->size - 1;
+			}
+			break;
+		case NUMBER_OF_PLAYERS:
+			if (menu->x_shift == 1 && game->players < 3) {
+				game->players = game->players + 1;
+				restart = true;
+			} else if (menu->x_shift == -1 && game->players > 0) {
+				game->players = game->players - 1;
+				restart = true;
+			}
+			break;
+		case PLAYER:
+			if (menu->x_shift == 1 && menu->selected_player < game->players-1) {
+				menu->selected_player = menu->selected_player + 1;
+			} else if (menu->x_shift == -1 && menu->selected_player > 0) {
+				menu->selected_player = menu->selected_player - 1;
+			}
+			break;
+		case COLOR:
+			if (menu->selected_player == 0) {
+				choose_color(&game->player1.color_index, menu->x_shift);
+			} else if (menu->selected_player == 1) {
+				choose_color(&game->player2.color_index, menu->x_shift);
+			} else if (menu->selected_player == 2) {
+				choose_color(&game->player3.color_index, menu->x_shift);
+			}
+			break;
+		case NUMBER_OF_BOTS:
+			if (menu->x_shift == 1 && game->bots < MAX_BOTS) {
+				game->bots = game->bots + 1;
+				restart = true;
+			} else if (menu->x_shift == -1 && game->bots > 0) {
+				game->bots = game->bots - 1;
+				restart = true;
+			}
+			break;
+		case DIFFICULTY:
+			if (menu->x_shift == 1 && (SLOWEST-(menu->speed*SPEED_STEP) > FASTEST) ) {
+				menu->speed = menu->speed + 1;
+			} else if (menu->x_shift == -1 && (SLOWEST-(menu->speed*SPEED_STEP) < SLOWEST) ) {
+				menu->speed = menu->speed - 1;
+			}
+			break;
+		case RESTART:
+			if (menu->x_shift == 1)       menu->restart = true;
+			else if (menu->x_shift == -1) menu->restart = false;
+			break;
+		case START:
+			if (menu->x_shift) menu->start = true;
+			break;
+		default:
+			break;
+	}
+	
+	render_logo(game->logo);
+	print_menu(menu, game);
+	render_menu(menu, game);
+	
+	if (menu->start == true) {
+		sleep(1);
+	}
+    menu->restart = menu->restart | restart; // proc toto????
 }
 
 bool set_game (menu_t * menu, game_t * game) {
@@ -348,7 +341,7 @@ bool set_game (menu_t * menu, game_t * game) {
 		game->player3.enable = true;
 		game->player3.alive = true;
 		// nastaveni barvy
-		RBG_to_16b (menu->colors[game->player2.color_index], &game->player2.color);
+		RBG_to_16b (menu->colors[game->player3.color_index], &game->player3.color);
 		// nastaveni pocatecni pozice
 		game->player3.position.x = 5 + (rand() % (WIDTH-10) );
 		game->player3.position.y = 5 + (rand() % (HEIGHT-10) );
