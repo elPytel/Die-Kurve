@@ -228,11 +228,11 @@ void render_logo (uint16_t * img) {
 	if (!img) {
 		fprintf(stderr, "ERROR: invalid img!\n");
 	}
-	render_gui(WIDTH, HEIGHT, img);
+	gui_render(WIDTH, HEIGHT, img);
 }
 
 bool render_game (game_t * game) {
-	render_gui(WIDTH, HEIGHT, game->game_bord);
+	gui_render(WIDTH, HEIGHT, game->game_bord);
 	return true;
 }
 
@@ -315,7 +315,7 @@ bool render_menu (menu_t *menu, game_t * game) {
                     break;
                 case NUMBER_OF_PLAYERS:
                     col+=width*size;
-                    print_char (menu, game, row, col, 0x30 + game->players, size, WHITE);
+                    print_char (menu, game, row, col, 0x30 + game->active_players_count, size, WHITE);
                     col+=width*size;
                     break;
                 case PLAYER:
@@ -325,16 +325,8 @@ bool render_menu (menu_t *menu, game_t * game) {
                     break;
                 case COLOR:
                     // OPRAVA: Indexování jmen barev na Row-Major formát podle vybraného hráče
-                    if (menu->selected_player == 0) {
-                        string = menu->color_names[game->player1.color_index * NBR_LANGUAGE + menu->language];
-                        print (menu, game, string, &row, &col, size, game->player1.color_index);
-                    } else if (menu->selected_player == 1) {
-                        string = menu->color_names[game->player2.color_index * NBR_LANGUAGE + menu->language];
-                        print (menu, game, string, &row, &col, size, game->player2.color_index);
-                    } else if (menu->selected_player == 2) {
-                        string = menu->color_names[game->player3.color_index * NBR_LANGUAGE + menu->language];
-                        print (menu, game, string, &row, &col, size, game->player3.color_index);
-                    }
+                    string = menu->color_names[game->players[menu->selected_player].color_index * NBR_LANGUAGE + menu->language];
+                    print (menu, game, string, &row, &col, size, game->players[menu->selected_player].color_index);
                     break;
                 case NUMBER_OF_BOTS:
                     string = num_to_str (game->bots);
@@ -367,7 +359,7 @@ bool render_menu (menu_t *menu, game_t * game) {
         row+=height*size;
         col = x;
     }
-    render_gui(WIDTH, HEIGHT, game->frame_buffer);
+    gui_render(WIDTH, HEIGHT, game->frame_buffer);
     return true;
 }
 
@@ -375,13 +367,13 @@ void render_score_bord (menu_t *menu, game_t * game) {
 	// projde pres vsechny hrace a boty a vypise jejich score
 	int size = menu->size;
 	int position = 0;
-    int shift = (game->bots+game->players)/2;
-    int index = (game->bots+game->players) - shift;
+    int shift = (game->bots+game->active_players_count)/2;
+    int index = (game->bots+game->active_players_count) - shift;
 	char *string = NULL;
 	int height = font_rom8x16.height;	// 16
 	int width = font_rom8x16.maxwidth;	//  8
 	
-	printf("Defoult posun: %d	index: %d/%d\n", position, index, game->bots+game->players);
+	printf("Defoult posun: %d	index: %d/%d\n", position, index, game->bots+game->active_players_count);
     // display
     for (int i = 0; i < HEIGHT*WIDTH; i++) {
         game->frame_buffer[i] = game->game_bord[i];
@@ -405,7 +397,7 @@ void render_score_bord (menu_t *menu, game_t * game) {
     // TODO
     // 32 LEDek
     if (index > 0) {
-        LED_stripe (game->score[game->bots+game->players-index]);
+        LED_stripe (game->score[game->bots+game->active_players_count-index]);
     } else {
         LED_stripe (0);
     }
@@ -417,7 +409,7 @@ void render_score_bord (menu_t *menu, game_t * game) {
     unsigned char delta = (menu->new_positon_w0 - menu->last_positon_w0 + 255) % 255;
     if (delta < 255/2 && delta > menu->step) { 				// down
         menu->last_positon_w0 = menu->new_positon_w0;
-        if ( index < game->bots+game->players ) {		
+        if ( index < game->bots+game->active_players_count ) {		
             //position+=delta;
             position+=16*size;
         }
@@ -429,41 +421,20 @@ void render_score_bord (menu_t *menu, game_t * game) {
         //}
     }
     y += position; 
-    index = game->bots+game->players -shift + position/(height*size);
-    printf("Posun: %d	index: %d/%d\n", position, index, game->bots+game->players);
-    
-    if ( game->players > 0 && game->player1.enable == true ) {
-        if ( y > -height*size) {			// text je mimo obraz
-            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player1.color_index);
-            print (menu, game, "1", &y, &x, size, WHITE);
-            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-            string = num_to_str (game->score[0]);
-            print (menu, game, string, &y, &x, size, WHITE);
-            x = col;
+    index = game->bots+game->active_players_count -shift + position/(height*size);
+    printf("Posun: %d	index: %d/%d\n", position, index, game->bots+game->active_players_count);
+    for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
+        if ( i < game->active_players_count && game->players[i].enable == true ) {
+            if ( y > -height*size) {			// text je mimo obraz
+                print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->players[i].color_index);
+                print (menu, game, num_to_str(i+1), &y, &x, size, WHITE);
+                print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
+                string = num_to_str (game->score[i]);
+                print (menu, game, string, &y, &x, size, WHITE);
+                x = col;
+            }
+            y+=height*size;
         }
-        y+=height*size;
-    }
-    if ( game->players > 2 && game->player2.enable == true ) {
-        if ( y > -height*size) {
-            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player2.color_index);
-            print (menu, game, "2", &y, &x, size, WHITE);
-            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-            string = num_to_str (game->score[1]);
-            print (menu, game, string, &y, &x, size, WHITE);
-            x = col;
-        }
-        y+=height*size;
-    }
-    if ( game->players > 3 && game->player3.enable == true ) {
-        if ( y > -height*size) {
-            print (menu, game, menu->words[PLAYERI+menu->language*NBR_WORD], &y, &x, size, game->player3.color_index);
-            print (menu, game, "3", &y, &x, size, WHITE);
-            print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-            string = num_to_str (game->score[2]);
-            print (menu, game, string, &y, &x, size, WHITE);
-            x = col;
-        }
-        y+=height*size;
     }
     // boti
     for (int i = 0; i < game->bots; i++) {
@@ -472,7 +443,7 @@ void render_score_bord (menu_t *menu, game_t * game) {
             string = num_to_str (i+1);
             print (menu, game, string, &y, &x, size, WHITE);
             print (menu, game, menu->words[SCORE+menu->language*NBR_WORD], &y, &x, size, WHITE);
-            string = num_to_str (game->score[i+game->players]);
+            string = num_to_str (game->score[i+game->active_players_count]);
             print (menu, game, string, &y, &x, size, WHITE);
             x = col;
         }
@@ -522,20 +493,14 @@ void print_menu(menu_t *menu, game_t * game) {
                     printf(" %d", menu->size);
                     break;
                 case NUMBER_OF_PLAYERS:
-                    printf(" %d", game->players);
+                    printf(" %d", game->active_players_count);
                     break;
                 case PLAYER:
                     printf(" %d", menu->selected_player + 1);
                     break;
                 case COLOR:
                     // 2. OPRAVA: Indexování jmen barev na Row-Major formát
-                    if (menu->selected_player == 0) {
-                        printf(" %s", menu->color_names[game->player1.color_index * NBR_LANGUAGE + menu->language]);
-                    } else if (menu->selected_player == 1) {
-                        printf(" %s", menu->color_names[game->player2.color_index * NBR_LANGUAGE + menu->language]);
-                    } else if (menu->selected_player == 2) {
-                        printf(" %s", menu->color_names[game->player3.color_index * NBR_LANGUAGE + menu->language]);
-                    }
+                    printf(" %s", menu->color_names[game->players[menu->selected_player].color_index * NBR_LANGUAGE + menu->language]);
                     break;
                 case NUMBER_OF_BOTS:
                     printf(" %d", game->bots);
@@ -571,18 +536,12 @@ void score_bord (menu_t *menu, game_t * game) {
 	// terminal
 	if (DEBUG) {
 		// hraci
-		if ( game->players > 0 && game->player1.enable == true ) {
-			printf("Player: 1 score: %d\n", game->score[0]);
-		}
-		if ( game->players > 2 && game->player2.enable == true ) {
-			printf("Player: 2 score: %d\n", game->score[1]);
-		}
-		if ( game->players > 3 && game->player3.enable == true ) {
-			printf("Player: 3 score: %d\n", game->score[2]);
-		}
+        for (int i = 0; i < game->active_players_count; i++) {
+            printf("Player: %d score: %d\n", i+1, game->score[i]);
+        }
 		// boti
 		for (int i = 0; i < game->bots; i++) {
-			printf("Bot: %d score: %d\n", i, game->score[i+game->players]);
+			printf("Bot: %d score: %d\n", i, game->score[i+game->active_players_count]);
 		}
 	}
 }

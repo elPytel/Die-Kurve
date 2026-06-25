@@ -15,6 +15,7 @@
 #include "game.h"
 #include "gui.h"
 #include "menu.h"
+#include "logger.h"
 
 #define DEBUG 1
 
@@ -30,6 +31,8 @@ int main() {
     uint32_t frame_start;
     int frame_time;
     char *logo_file = "./assets/dieKurve.ppm";
+
+    logger_init("game.log");
 
     gui_init();  // alokoje a smaze graficky buffer
     game_t game;
@@ -72,8 +75,18 @@ int main() {
         }
         // nastaveni hernich parametru podle dat z menu
         set_game(&menu, &game);
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            char log_buf[256];
+            player_to_string(&game.players[i], log_buf, sizeof(log_buf));
+            logger_log("Info o hráči: %s", log_buf);
+        }
         while (game_playing(&game)) {
             printf("Game is running...\n");
+            logger_log("Game is running...\n");
+            char log_buf[256];
+            player_to_string(&game.players[0], log_buf, sizeof(log_buf));
+            logger_log("Info o hráči: %s", log_buf);
+
             frame_start = SDL_GetTicks();
             pool_events();
 
@@ -112,7 +125,7 @@ int main() {
 
 
             render_score_bord(&menu, &game);
-            render_gui(WIDTH, HEIGHT, game.frame_buffer);
+            gui_render(WIDTH, HEIGHT, game.frame_buffer);
 
             if (DEBUG) {
                 menu.restart = false;
@@ -123,7 +136,7 @@ int main() {
             }
         }
     }
-    kill_gui();
+    gui_kill();
     kill_menu(&menu);
     game_kill_all(&game);
     return OK;

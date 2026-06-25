@@ -15,7 +15,7 @@ void pool_events () {
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            kill_gui();
+            gui_kill();
             exit(0);
         }
 
@@ -70,20 +70,6 @@ bool RGB_LED (int number, color_t color) {
 // output 32 LEDs
 void LED_stripe (int number) {}
 
-#include <termios.h> 
-void Call_termios(int reset) {
-	static struct termios tio, tioOld;
-	tcgetattr(STDIN_FILENO, &tio);
-	if (reset) {
-		tcsetattr(STDIN_FILENO, TCSANOW, &tioOld);
-	} else {
-		tioOld = tio; //backup 
-		cfmakeraw(&tio);
-		tio.c_oflag |= OPOST;
-		tcsetattr(STDIN_FILENO, TCSANOW, &tio);
-	}
-}
-
 //--- SDL ----------------------------------------------------------
 
 unsigned char *img = NULL;
@@ -97,13 +83,13 @@ bool gui_init () {
 	return ret;
 }
 
-bool kill_gui () {
+bool gui_kill () {
 	xwin_close();
 	free(img);
 	return true;
 }
 
-bool render_gui (int w, int h, uint16_t *frame_buffer) {
+bool gui_render (int w, int h, uint16_t *frame_buffer) {
 	uint16_t pixel = 0;
 	
 	for (int index = 0; index < WIDTH*HEIGHT; index++) {

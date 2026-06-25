@@ -3,16 +3,16 @@
 #include "game.h"
 #include "driver.h"
 #include "gui.h"
+#include "logger.h"
 
 #define DEBUG 1
-
-#define MAX_PLAYERS 3
 
 bool game_playing (game_t * game) { return game->playing; }
 
 void player_init (player_t *player) {
 	player->enable = false;
 	player->alive = false;
+	player->encoder_id = -1;
 	player->color_index = 0;
 	player->color = 0;
 	// pozice
@@ -24,17 +24,17 @@ void player_init (player_t *player) {
 	// old vektor
 	player->old_vector.x = 0;
 	player->old_vector.y = 0;
-	// random seed
-	srand(time(0));
 }
 
 bool game_init (game_t * game) {
 	game->playing = false;
 	// hraci
-	game->players = 0;		// pocet hracu
-	player_init (&game->player1);
-	player_init (&game->player2);
-	player_init (&game->player3);
+	game->active_players_count = 0;		// pocet hracu
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		player_init(&game->players[i]);
+		game->players[i].encoder_id = i;
+		game->players[i].color_index = i;
+	}
 	// boti
 	game->bots = 0;			// počet bot ve hře
 	game->positions = NULL;
@@ -48,7 +48,18 @@ bool game_init (game_t * game) {
 	game->game_bord = NULL;
 	game->logo = NULL;
 	game->frame_buffer = NULL;
+	// random seed
+	srand(time(0));
 	return true;
+}
+
+void player_to_string(player_t *p, char *buffer, size_t buf_size) {
+    snprintf(buffer, buf_size, 
+             "Player [Enable: %d, Alive: %d, Pos: (%d, %d), Vec: (%d, %d), ColorIdx: %d]", 
+             p->enable, p->alive, 
+             p->position.x, p->position.y, 
+             p->vector.x, p->vector.y, 
+             p->color_index);
 }
 
 void right (int *dy, int *dx) {
@@ -257,7 +268,7 @@ void game_AI_move (game_t * game) {
 				move(game, &dy, &dx, i, random);
 				
 				// next step
-				next_step (game, &x1, &y1, &x2, &y2, &x3, &y3, dx, dy, i);
+				next_step(game, &x1, &y1, &x2, &y2, &x3, &y3, dx, dy, i);
 				
 				// validity
 				if ( x1>WIDTH-3 || y1>HEIGHT-3 || x1<3 || y1<3 || x2>WIDTH-2 || y2>HEIGHT-2 || x2<2 || y2<2 || x3>WIDTH-2 || y3>HEIGHT-2 || x3<2 || y3<2 ) {
@@ -267,7 +278,7 @@ void game_AI_move (game_t * game) {
 					// jeden pred
 					pixel1 = game->game_bord[y1*WIDTH +x1];
 					pixel2 = game->game_bord[y2*WIDTH +x2];
-					pixel2 = game->game_bord[y3*WIDTH +x3];
+					pixel3 = game->game_bord[y3*WIDTH +x3];
 					// dava pred
 					pixel4 = game->game_bord[(y1+2*dy)*WIDTH +(x1+2*dx)];
 					pixel5 = game->game_bord[(y2+2*dy)*WIDTH +(x2+2*dx)];
@@ -322,43 +333,41 @@ void degree_to_vector (int degree, int *y, int *x) {
 	}
 }
 
-// PC demo
-int old_degree = 0;
+void player_move(game_t *game) {
+    uint8_t degree;
 
-void player_move (game_t * game) {
-	uint8_t degree = -1;
-	// pohyb vsech aktivnich a zivich hracu
-	
-	if ( game->players > 0 && game->player1.alive == true) {
-		// nastaveni noveho vektoru
-		// TODO
-		// PC demo
-		degree = old_degree;
-		encoder_position(0, &degree);
-		old_degree = degree;
-		game->player1.old_vector.y = game->player1.vector.y;
-		game->player1.old_vector.x = game->player1.vector.x;
-		degree_to_vector ((int)degree, &game->player1.vector.y, &game->player1.vector.x);
-		printf("dy: %d	dx: %d - set\n", game->player1.vector.y, game->player1.vector.x);
-		// inivializace
-		if (game->player1.old_vector.y == 0 && game->player1.old_vector.x == 0) {
-			game->player1.old_vector.y = game->player1.vector.y;
-			game->player1.old_vector.x = game->player1.vector.x;
-			printf("OLD dy: %d	dx: %d	- set\n", game->player1.old_vector.y, game->player1.old_vector.x);
-		} else if (DEBUG) {
-			printf("OLD dy: %d	dx: %d	- seted\n", game->player1.old_vector.y, game->player1.old_vector.x);
-		}
-	}
-	if ( game->players > 2 && game->player2.alive == true) {
-		// nastaveni noveho vektoru
-		encoder_position(1, &degree);
-		degree_to_vector ((int)degree, &game->player2.vector.y, &game->player2.vector.x);
-	}
-	if ( game->players > 3 && game->player3.alive == true) {
-		// nastaveni noveho vektoru
-		encoder_position(2, &degree);
-		degree_to_vector ((int)degree, &game->player3.vector.y, &game->player3.vector.x);
-	}
+    // Iterujeme přes všechny možné sloty hráčů
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        player_t *p = &game->players[i]; // Ukazatel na aktuálního hráče
+
+        // Přeskočíme, pokud hráč neexistuje nebo je mrtvý
+        if (!p->enable || !p->alive) {
+            continue;
+        }
+
+        // 1. Získání úhlu z příslušného enkodéru
+        // Tady využíváme tvé stávající API encoder_position
+        if (encoder_position(p->encoder_id, &degree)) {
+            
+            // 2. Uložení starého vektoru
+            p->old_vector.y = p->vector.y;
+            p->old_vector.x = p->vector.x;
+
+            // 3. Výpočet nového vektoru
+            degree_to_vector((int)degree, &p->vector.y, &p->vector.x);
+
+            // 4. Inicializace vektoru (pokud je první tah)
+            if (p->old_vector.y == 0 && p->old_vector.x == 0) {
+                p->old_vector.y = p->vector.y;
+                p->old_vector.x = p->vector.x;
+            }
+
+            if (DEBUG) {
+                printf("Player %d: dy: %d dx: %d\n", i, p->vector.y, p->vector.x);
+				logger_log("Player %d: dy: %d dx: %d", i, p->vector.y, p->vector.x);
+            }
+        }
+    }
 }
 
 int direction_change (int dy, int dx, int dy_old, int dx_old) {
@@ -426,7 +435,62 @@ bool player_invalid_move (int direction, uint16_t pixel1, uint16_t pixel2, uint1
 }
 
 void game_validate_play (game_t * game) {
-	// promene
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+        player_t *p = &game->players[i];
+        
+        if (!p->enable || !p->alive) continue;
+
+        int dy = p->vector.y;
+        int dx = p->vector.x;
+
+        // Výpočet pozic (střed, levá, pravá pro detekci kolizí)
+        int x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
+		int y = p->position.y;
+		int x = p->position.x;
+		// nova pozice
+		// left
+		left (&dy, &dx);
+		y3 = y + dy;
+		x3 = x + dx;
+		// midle
+		right (&dy, &dx);
+		y1 = y + dy;
+		x1 = x + dx;
+		// right
+		right (&dy, &dx);
+		y2 = y + dy;
+		x2 = x + dx;
+		left (&dy, &dx);	//reset
+
+        // Validace hranic
+        if (x1 >= WIDTH || y1 >= HEIGHT || x1 < 0 || y1 < 0 || 
+            x2 >= WIDTH || y2 >= HEIGHT || x2 < 0 || y2 < 0 || 
+            x3 >= WIDTH || y3 >= HEIGHT || x3 < 0 || y3 < 0) {
+            
+            p->alive = false;
+            game->score[i] += game_calculate_score(game);
+        } else {
+            // Kontrola kolizí s již existující čarou
+            uint16_t p1 = game->game_bord[y1 * WIDTH + x1];
+            uint16_t p2 = game->game_bord[y2 * WIDTH + x2];
+            uint16_t p3 = game->game_bord[y3 * WIDTH + x3];
+
+            if (player_invalid_move(direction_change(dy, dx, p->old_vector.y, p->old_vector.x), p1, p2, p3, p->color)) {
+                p->alive = false;
+                game->score[i] += game_calculate_score(game);
+            } else {
+                // Tah je validní, kreslíme
+                game->game_bord[y1 * WIDTH + x1] = p->color;
+                game->game_bord[y2 * WIDTH + x2] = p->color;
+                game->game_bord[y3 * WIDTH + x3] = p->color;
+                p->position.y = y1;
+                p->position.x = x1;
+            }
+        }
+    }
+	
+	// valid and play bot
+	// kazdy bot
 	uint16_t pixel1 = 0;
 	uint16_t pixel2 = 0;
 	uint16_t pixel3 = 0;
@@ -443,152 +507,6 @@ void game_validate_play (game_t * game) {
 	// vektor
 	int dy;
 	int dx;
-	
-	// zmena smeru hrace
-	int direction = 0;
-	
-	// valid and play player
-	if ( game->players > 0 && game->player1.alive == true) {
-		// vektor
-		dy = game->player1.vector.y;
-		dx = game->player1.vector.x;
-		// stara pozice 
-		int y = game->player1.position.y;
-		int x = game->player1.position.x;
-		// nova pozice
-		// left
-		left (&dy, &dx);
-		y3 = y + dy;
-		x3 = x + dx;
-		// midle
-		right (&dy, &dx);
-		y1 = y + dy;
-		x1 = x + dx;
-		// right
-		right (&dy, &dx);
-		y2 = y + dy;
-		x2 = x + dx;
-		left (&dy, &dx);	//reset
-		// validity
-		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
-			// umrel dostane skore
-			game->player1.alive = false;
-			game->score[0] += game_make_score(game);
-		} else {
-			pixel1 = game->game_bord[y1*WIDTH +x1];
-			pixel2 = game->game_bord[y2*WIDTH +x2];
-			pixel3 = game->game_bord[y3*WIDTH +x3];
-			int dy_old = game->player1.old_vector.y;
-			int dx_old = game->player1.old_vector.x;
-			direction = direction_change(dy, dx, dy_old, dx_old);
-		}
-		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player1.color) ) {		// obsazene pole
-			game->player1.alive = false;
-			game->score[0] += game_make_score(game);	
-		} else {
-			// zahral tah
-			game->game_bord[y1*WIDTH +x1] = game->player1.color;
-			game->game_bord[y2*WIDTH +x2] = game->player1.color;
-			game->game_bord[y3*WIDTH +x3] = game->player1.color;
-			game->player1.position.y = y1;
-			game->player1.position.x = x1;
-		}
-	}
-	if ( game->players > 2 && game->player2.alive == true) {
-		// vektor
-		dy = game->player2.vector.y;
-		dx = game->player2.vector.x;
-		// stara pozice 
-		int y = game->player2.position.y;
-		int x = game->player2.position.x;
-		// nova pozice
-		// left
-		left (&dy, &dx);
-		y3 = y + dy;
-		x3 = x + dx;
-		// midle
-		right (&dy, &dx);
-		y1 = y + dy;
-		x1 = x + dx;
-		// right
-		right (&dy, &dx);
-		y2 = y + dy;
-		x2 = x + dx;
-		left (&dy, &dx);	//reset
-		// validity
-		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
-			// umrel dostane skore
-			game->player2.alive = false;
-			game->score[1] += game_make_score(game);
-		} else {
-			pixel1 = game->game_bord[y1*WIDTH +x1];
-			pixel2 = game->game_bord[y2*WIDTH +x2];
-			pixel3 = game->game_bord[y3*WIDTH +x3];
-			int dy_old = game->player2.old_vector.y;
-			int dx_old = game->player2.old_vector.x;
-			direction = direction_change(dy, dx, dy_old, dx_old);
-		}
-		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player2.color) ) {		// obsazene pole
-			game->player2.alive = false;
-			game->score[1] += game_make_score(game);	
-		} else {
-			// zahral tah
-			game->game_bord[y1*WIDTH +x1] = game->player2.color;
-			game->game_bord[y2*WIDTH +x2] = game->player2.color;
-			game->game_bord[y3*WIDTH +x3] = game->player2.color;
-			game->player2.position.y = y1;
-			game->player2.position.x = x1;
-		}
-	}
-	if ( game->players > 3 && game->player3.alive == true) {
-		// vektor
-		dy = game->player3.vector.y;
-		dx = game->player3.vector.x;
-		// stara pozice 
-		int y = game->player3.position.y;
-		int x = game->player3.position.x;
-		// nova pozice
-		// left
-		left (&dy, &dx);
-		y3 = y + dy;
-		x3 = x + dx;
-		// midle
-		right (&dy, &dx);
-		y1 = y + dy;
-		x1 = x + dx;
-		// right
-		right (&dy, &dx);
-		y2 = y + dy;
-		x2 = x + dx;
-		left (&dy, &dx);	//reset
-		// validity
-		if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
-			// umrel dostane skore
-			game->player3.alive = false;
-			game->score[2] += game_make_score(game);
-		} else {
-			pixel1 = game->game_bord[y1*WIDTH +x1];
-			pixel2 = game->game_bord[y2*WIDTH +x2];
-			pixel3 = game->game_bord[y3*WIDTH +x3];
-			int dy_old = game->player3.old_vector.y;
-			int dx_old = game->player3.old_vector.x;
-			direction = direction_change(dy, dx, dy_old, dx_old);
-		}
-		if ( player_invalid_move (direction, pixel1, pixel2, pixel3, game->player3.color) ) {		// obsazene pole
-			game->player3.alive = false;
-			game->score[2] += game_make_score(game);	
-		} else {
-			// zahral tah
-			game->game_bord[y1*WIDTH +x1] = game->player3.color;
-			game->game_bord[y2*WIDTH +x2] = game->player3.color;
-			game->game_bord[y3*WIDTH +x3] = game->player3.color;
-			game->player3.position.y = y1;
-			game->player3.position.x = x1;
-		}
-	}
-	
-	// valid and play bot
-	// kazdy bot
 	for (int i = 0; i < game->bots; i++) {
 		if (game->live_bots[i]) {	// dany bot je na zivu
 			// vektor
@@ -600,7 +518,7 @@ void game_validate_play (game_t * game) {
 			// validity
 			if ( x1>=WIDTH || y1>=HEIGHT || x1<0 || y1<0 || x2>=WIDTH || y2>=HEIGHT || x2<0 || y2<0 || x3>=WIDTH || y3>=HEIGHT || x3<0 || y3<0 ) {
 				game->live_bots[i] = false;
-				game->score[i+game->players] = game->score[i+game->players] + game_make_score(game);
+				game->score[i+game->active_players_count] = game->score[i+game->active_players_count] + game_calculate_score(game);
 			} else {
 				pixel1 = game->game_bord[y1*WIDTH +x1];
 				pixel2 = game->game_bord[y2*WIDTH +x2];
@@ -608,7 +526,7 @@ void game_validate_play (game_t * game) {
 			}
 			if ( pixel1 != 0 || (pixel2 != 0 && pixel2 != game->colors[i]) || (pixel3 != 0 && pixel3 != game->colors[i]) ) {	// obsazene pole
 				game->live_bots[i] = false;
-				game->score[i+game->players] = game->score[i+game->players] + game_make_score(game);	
+				game->score[i+game->active_players_count] = game->score[i+game->active_players_count] + game_calculate_score(game);	
 			} else {
 				// zahral tah
 				game->game_bord[y1*WIDTH +x1] = game->colors[i];
@@ -621,47 +539,42 @@ void game_validate_play (game_t * game) {
 	}
 	
 	// zije jeste nekdo?
-	game_is_someon_alive (game);
+	game->playing = game_is_someon_alive(game);
 	
-	if (DEBUG && !game_playing (game) ) {
+	if (DEBUG && !game_playing(game) ) {
 		printf("Everybody's dead dave!\n");
 	}
 }
 
-void game_is_someon_alive (game_t * game) {
-	game->playing = false;
-	
+bool game_is_someon_alive (game_t * game) {
 	// hraci
-	if ( game->players > 0 && game->player1.alive == true) {
-		game->playing = true;
-	}
-	if ( game->players > 2 && game->player2.alive == true) {
-		game->playing = true;
-	}
-	if ( game->players > 3 && game->player3.alive == true) {
-		game->playing = true;
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (game->players[i].enable && game->players[i].alive) {
+			return true;
+		}
 	}
 	
 	// boti
 	for (int i = 0; i < game->bots; i++) {
 		if (game->live_bots[i]) {	// dany bot je na zivu
-			game->playing = true;
+			return true;
 		}
 	}
+	return false;
 }
 
-int game_make_score(game_t * game) {
+void game_set_if_someon_alive (game_t * game) {
+	game->playing = game_is_someon_alive(game);
+}
+
+int game_calculate_score(game_t * game) {
 	// spocita kolik je mrtvych hracu a botu a tu hodnotu vrati
 	int score = 0;
-	// hraci
-	if ( game->players > 0 && game->player1.alive == false) {
-		score++;
-	}
-	if ( game->players > 2 && game->player2.alive == false) {
-		score++;
-	}
-	if ( game->players > 3 && game->player3.alive == false) {
-		score++;
+	
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (game->players[i].enable && game->players[i].alive == false) {
+			score++;
+		}
 	}
 	
 	// boti
@@ -748,15 +661,4 @@ void degree_to_vector (int degree, int *y, int *x) {
 		*x = 1;
 	}
 }*/
-/*
-
-	if (0 && DEBUG) {
-		printf(" From: %d:%d To: %d:%d", game->positions[i].y, game->positions[i].x, y1, x1);
-	}
-	
-	 printf("R: %X\n", mix);
-	 printf("R+G: %X\n", mix);
-	 printf("R+G+B: %X\n", mix);
-
-*/
 /* end of game.c */

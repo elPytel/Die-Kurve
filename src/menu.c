@@ -4,6 +4,7 @@
 
 #include "driver.h"
 #include "gui.h"
+#include "logger.h"
 
 #define DEBUG 1
 #define STEP 15
@@ -147,13 +148,11 @@ void menu_function (menu_t * menu, game_t * game) {
 	X_menu_position(menu);
 	
 	// Obsluha periferií podle vybraného hráče
-	if (menu->selected_player < game->players && game->score != NULL) {
+	if (menu->selected_player < game->active_players_count && game->score != NULL) {
 		// Zjednodušená bezpečná obsluha LED pro hráče 0, 1, 2
-		int color_idx = (menu->selected_player == 0) ? game->player1.color_index :
-						(menu->selected_player == 1) ? game->player2.color_index : 
-														game->player3.color_index;
+		int color_idx = game->players[menu->selected_player].color_index;
 		RGB_LED(0, menu->colors[color_idx]);
-		LED_stripe(game->score[menu->selected_player == 0 ? 0 : 2]); // Ponecháno původní větvení indexů score
+		LED_stripe(game->score[menu->selected_player]); // Ponecháno původní větvení indexů score
 	}
 	
 	switch (menu->item) {
@@ -172,29 +171,23 @@ void menu_function (menu_t * menu, game_t * game) {
 			}
 			break;
 		case NUMBER_OF_PLAYERS:
-			if (menu->x_shift == 1 && game->players < 3) {
-				game->players = game->players + 1;
+			if (menu->x_shift == 1 && game->active_players_count < 3) {
+				game->active_players_count = game->active_players_count + 1;
 				restart = true;
-			} else if (menu->x_shift == -1 && game->players > 0) {
-				game->players = game->players - 1;
+			} else if (menu->x_shift == -1 && game->active_players_count > 0) {
+				game->active_players_count = game->active_players_count - 1;
 				restart = true;
 			}
 			break;
 		case PLAYER:
-			if (menu->x_shift == 1 && menu->selected_player < game->players-1) {
+			if (menu->x_shift == 1 && menu->selected_player < game->active_players_count-1) {
 				menu->selected_player = menu->selected_player + 1;
 			} else if (menu->x_shift == -1 && menu->selected_player > 0) {
 				menu->selected_player = menu->selected_player - 1;
 			}
 			break;
 		case COLOR:
-			if (menu->selected_player == 0) {
-				choose_color(&game->player1.color_index, menu->x_shift);
-			} else if (menu->selected_player == 1) {
-				choose_color(&game->player2.color_index, menu->x_shift);
-			} else if (menu->selected_player == 2) {
-				choose_color(&game->player3.color_index, menu->x_shift);
-			}
+			choose_color(&game->players[menu->selected_player].color_index, menu->x_shift);
 			break;
 		case NUMBER_OF_BOTS:
 			if (menu->x_shift == 1 && game->bots < MAX_BOTS) {
@@ -254,8 +247,8 @@ bool set_game (menu_t * menu, game_t * game) {
 		
 		game->live_bots = (bool*) malloc ( game->bots*sizeof(bool) );
 		game->directions = (int*) malloc ( (game->bots) * sizeof(int) );
-		game->score = (int*) malloc ( (game->bots+game->players) * sizeof(int) );
-		for (int i = 0; i < game->bots+game->players; i++) {
+		game->score = (int*) malloc ( (game->bots+game->active_players_count) * sizeof(int) );
+		for (int i = 0; i < game->bots+game->active_players_count; i++) {
 			game->score[i] = 0;
 		}
 		
@@ -310,43 +303,30 @@ bool set_game (menu_t * menu, game_t * game) {
 	}
 	
 	// aktivace hracu
-	if ( game->players > 0 ) {
-		game->player1.enable = true;
-		game->player1.alive = true;
-		// nastaveni barvy
-		RBG_to_16b (menu->colors[game->player1.color_index], &game->player1.color);
-		if (DEBUG) {
-			printf("Player color index: %d\n", game->player1.color_index);
-			unsigned char R,G,B;
-			R = menu->colors[game->player1.color_index].R;
-			G = menu->colors[game->player1.color_index].G;
-			B = menu->colors[game->player1.color_index].B;
-			printf("R: %d G: %d B: %d	", R, G, B);
-			printf("16b color: %d\n", game->player1.color);
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		if (i < game->active_players_count) {
+			game->players[i].enable = true;
+			game->players[i].alive = true;
+		} else {
+			game->players[i].enable = false;
+			game->players[i].alive = false;
 		}
-		// nastaveni pocatecni pozice
-		game->player1.position.x = 5 + (rand() % (WIDTH-10) );	// +-5 od kazdeho okraje = magic number
-		game->player1.position.y = 5 + (rand() % (HEIGHT-10) );
+		RBG_to_16b (menu->colors[game->players[i].color_index], &game->players[i].color);
+		game->players[i].position.x = 5 + (rand() % (WIDTH-10) );
+		game->players[i].position.y = 5 + (rand() % (HEIGHT-10) );
+		game->players[i].vector.x = 0;
+		game->players[i].vector.y = 0;
+		if (DEBUG) {
+			logger_log("Player position: (%d, %d)", game->players[i].position.x, game->players[i].position.y);
+			logger_log("Player color index: %d", game->players[i].color_index);
+			unsigned char R,G,B;
+			R = menu->colors[game->players[i].color_index].R;
+			G = menu->colors[game->players[i].color_index].G;
+			B = menu->colors[game->players[i].color_index].B;
+			logger_log("R: %d G: %d B: %d	", R, G, B);
+			logger_log("16b color: %d", game->players[i].color);
+		}
 	}
-	if ( game->players > 1 ) {
-		game->player2.enable = true;
-		game->player2.alive = true;
-		// nastaveni barvy
-		RBG_to_16b (menu->colors[game->player2.color_index], &game->player2.color);
-		// nastaveni pocatecni pozice
-		game->player2.position.x = 5 + (rand() % (WIDTH-10) );
-		game->player2.position.y = 5 + (rand() % (HEIGHT-10) );
-	}
-	if ( game->players > 2 ) {
-		game->player3.enable = true;
-		game->player3.alive = true;
-		// nastaveni barvy
-		RBG_to_16b (menu->colors[game->player3.color_index], &game->player3.color);
-		// nastaveni pocatecni pozice
-		game->player3.position.x = 5 + (rand() % (WIDTH-10) );
-		game->player3.position.y = 5 + (rand() % (HEIGHT-10) );
-	}
-	
 	return true;
 }
 

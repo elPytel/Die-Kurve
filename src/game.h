@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <time.h> 
 
+#define MAX_PLAYERS 3
+#define MAX_BOTS 10
+
 /**
  * @brief color structure
  * 
@@ -39,6 +42,7 @@ typedef struct {
 typedef struct {
 	bool enable;	/**< ucastni se hry */
 	bool alive;		/**< still not dead */
+	int encoder_id;	/**< id enkoderu */
 	// color
 	int color_index;
 	uint16_t color;
@@ -57,10 +61,8 @@ typedef struct {
 typedef struct {
 	bool playing;
 	// hraci
-	int players;		// pocet hracu
-	player_t player1;
-	player_t player2; 
-	player_t player3;
+	int active_players_count;		// pocet hracu
+	player_t players[MAX_PLAYERS];
 	// boti
 	int bots;			// počet bot ve hře
 	position_t *positions;
@@ -68,7 +70,7 @@ typedef struct {
 	uint16_t *colors;	// pole barev botu
 	bool *live_bots;
 	int *directions;
-	int *score;			// [players+bots] pole, ktere drzi skore pro kazdeho hrace i bota
+	int *score;			// [active_players_count+bots] pole, ktere drzi skore pro kazdeho hrace i bota
 	int *spaces;		// cerchovany mod
 	int speed;			// turn time
 	uint16_t *logo;			// zde je nahrane herni logo
@@ -77,6 +79,8 @@ typedef struct {
 } game_t;
 
 
+void player_to_string(player_t *p, char *buffer, size_t buf_size);
+
 /**
  * @brief Returns true if the game is still running.
  * @param game Pointer to the game structure.
@@ -84,14 +88,20 @@ typedef struct {
  */
 bool game_playing (game_t * game);
 
-// inicialiuje strukturu game_t
+/**
+ * @brief Initializes the game structure with default values.
+ * @param game Pointer to the game structure to be initialized.
+ * @return true if initialization was successful, false otherwise.
+ */
 bool game_init (game_t * game);
+
+bool game_is_someon_alive (game_t * game);
 
 /**
  * @brief Checks if any player or bot is still alive and updates the game state accordingly.
  * @param game Pointer to the game structure.
  */
-void game_is_someon_alive (game_t * game);
+void game_set_if_someon_alive (game_t * game);
 
 // aktualizuje vektro bota
 void game_AI_move (game_t * game);
@@ -101,19 +111,20 @@ void player_move (game_t * game);
 
 /**
  * @brief Checks the validity of a move.
- * Evaluate points for dead players and bots and updates the game state for alive players.
+ * Evaluate points for dead active_players_count and bots and updates the game state for alive active_players_count.
  * @param game Pointer to the game structure.
  */
 void game_validate_play(game_t * game);
 
-int game_make_score(game_t * game);
+/**
+ * @brief Will calculate the score based on the number of dead players and bots.
+ */
+int game_calculate_score(game_t * game);
 
 // dekonstruktor
 void game_free (game_t * game);
 
 void game_kill_all (game_t * game);
-
-// po vyjeti z menu na polozku start se zahaji hra s nastavenymi parametry.
 
 #endif
 /* end of game.h */

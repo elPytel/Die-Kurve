@@ -48,12 +48,10 @@ bool RGB_LED (int number, color_t color);
  */
 void LED_stripe (int number);
 
-void Call_termios(int reset);
-
 #include "xwin_sdl.h"
 
-# define HEIGHT 320
-# define WIDTH 	480
+#define HEIGHT 320
+#define WIDTH  480
 
 	//240	//480
 	//320	//640
@@ -68,7 +66,7 @@ bool gui_init ();
  * @brief Closes the GUI and frees allocated resources.
  * @return true if the GUI was closed successfully, false otherwise.
  */
-bool kill_gui ();
+bool gui_kill ();
 
 /**
  * @brief Converts a 16-bit color matrix to an RGB image.
@@ -77,7 +75,7 @@ bool kill_gui ();
  * @param frame_buffer pointer to the frame buffer containing 16b color data
  * @return true if the conversion and rendering were successful, false otherwise
  */
-bool render_gui (int w, int h, uint16_t *img);
+bool gui_render (int w, int h, uint16_t *img);
 
 #endif
 /* end of driver.h */
