@@ -64,6 +64,10 @@ Pravý knoflík:
 - J
 - K
 
+Menu, DF ovládá nahoru a dolu, JK ovládá výběr.
+
+Po dojeti v menu na polozku start a nastavení na ANO se zahaji hra s nastavenymi parametry.
+
 ## Cíle makefile
 
 ```txt
