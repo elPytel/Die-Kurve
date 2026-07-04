@@ -57,12 +57,71 @@ bool print_char (menu_t *menu, game_t * game, int y, int x, int index, int size,
 	}
 	return true;
 }
+
+typedef struct {
+    char byte1;
+    char byte2;
+    unsigned char font_index;
+} utf8_lookup_table_t;
+
 /*
 char?
 175 - sipka
 0x61 = 97 => a
 0x30 = cisla
 */
+static const utf8_lookup_table_t utf8_to_font[] = {
+    // 0xC5 mapování
+    {-59, -66,  0x98}, // ž
+    {-59, -67,  0xa7}, // Ž
+    {-59, -81,  0x90}, // ů
+    {-59, -82,  0x9f}, // Ů
+    {-59, -91,  0x96}, // ť
+    {-59, -92,  0xa5}, // Ť
+    {-59, -95,  0x93}, // š
+    {-59, -96,  0xa2}, // Š
+    {-59, -103, 0x92}, // ř
+    {-59, -104, 0xa1}, // Ř
+    {-59, -120, 0x97}, // ň
+    {-59, -121, 0xa6}, // Ň
+    {-59, -72,  0x84}, // Ÿ
+    
+    // 0xC4 mapování
+    {-60, -101, 0x91}, // ě
+    {-60, -102, 0xa0}, // Ě
+    {-60, -113, 0x95}, // ď
+    {-60, -114, 0xa4}, // Ď
+    {-60, -115, 0x94}, // č
+    {-60, -116, 0xa3}, // Č
+    
+    // 0xC3 mapování
+    {-61, -67,  0x8d}, // ý 
+    {-61, -70,  0x8f}, // ú 
+    {-61, -77,  0x8e}, // ó 
+    {-61, -83,  0x8c}, // í 
+    {-61, -87,  0x8b}, // é 
+    {-61, -95,  0x8a}, // á
+    {-61, -99,  0x9c}, // Ý 
+    {-61, -102, 0x9e}, // Ú 
+    {-61, -109, 0x9d}, // Ó 
+    {-61, -115, 0x9b}, // Í 
+    {-61, -119, 0x9a}, // É 
+    {-61, -127, 0x99}, // Á 
+    {-61, -65,  0x84}, // ÿ
+    {-61, -68,  0x86}, // ü
+    {-61, -74,  0x85}, // ö
+    {-61, -81,  0x83}, // ï
+    {-61, -85,  0x82}, // ë
+    {-61, -92,  0x81}, // ä
+    {-61, -100, 0x89}, // Ü
+    {-61, -106, 0x88}, // Ö
+    {-61, -113, 0x83}, // Ï
+    {-61, -117, 0x82}, // Ë
+    {-61, -124, 0x87}  // Ä
+};
+
+#define LOOKUP_TABLE_SIZE (sizeof(utf8_to_font) / sizeof(utf8_lookup_table_t))
+
 unsigned char* translate(const char *string) {
     unsigned char *translated = NULL;
     int len = 0;
@@ -79,94 +138,29 @@ unsigned char* translate(const char *string) {
     int index_out = 0; // Index zápisu do výstupu
 
     while (index_in < len) {
-        char c = string[index_in];
-
-        // Standardní ASCII (latinka, čísla, mezery, interpunkce) - zapisujeme 1:1
-        if ((unsigned char)c < 128) {
-            translated[index_out++] = c; 
-            index_in++;
-        } else { // Vícebajtové UTF-8 znaky (Česká a německá abeceda)
-            char ch = string[index_in + 1]; // Podíváme se na druhý bajt
-
-            switch(c) {
-                case -59: // 0xC5
-                    switch (ch) {
-                        case -66:  translated[index_out++] = 0x98; break; // ž
-                        case -67:  translated[index_out++] = 0xa7; break; // Ž
-                        case -81:  translated[index_out++] = 0x90; break; // ů
-                        case -82:  translated[index_out++] = 0x9f; break; // Ů
-                        case -91:  translated[index_out++] = 0x96; break; // ť
-                        case -92:  translated[index_out++] = 0xa5; break; // Ť
-                        case -95:  translated[index_out++] = 0x93; break; // š
-                        case -96:  translated[index_out++] = 0xa2; break; // Š
-                        case -103: translated[index_out++] = 0x92; break; // ř
-                        case -104: translated[index_out++] = 0xa1; break; // Ř
-                        case -120: translated[index_out++] = 0x97; break; // ň
-                        case -121: translated[index_out++] = 0xa6; break; // Ň
-                        case -72:  translated[index_out++] = 0x84; break; // Ÿ
-                        default:   translated[index_out++] = '?';  break; // Neznámý znak
-                    }
-                    index_in += 2; // Posuneme se o oba zpracované bajty UTF-8
+        if ((unsigned char)string[index_in] < 128) {
+            translated[index_out++] = string[index_in++];
+        } else {
+            char b1 = string[index_in];
+            char b2 = string[index_in + 1];
+            bool found = false;
+            
+            for (int i = 0; i < LOOKUP_TABLE_SIZE; i++) {
+                if (utf8_to_font[i].byte1 == b1 && utf8_to_font[i].byte2 == b2) {
+                    translated[index_out++] = utf8_to_font[i].font_index;
+                    found = true;
                     break;
-
-                case -60: // 0xC4
-                    switch (ch) {
-                        case -101: translated[index_out++] = 0x91; break; // ě
-                        case -102: translated[index_out++] = 0xa0; break; // Ě
-                        case -113: translated[index_out++] = 0x95; break; // ď
-                        case -114: translated[index_out++] = 0xa4; break; // Ď
-                        case -115: translated[index_out++] = 0x94; break; // č
-                        case -116: translated[index_out++] = 0xa3; break; // Č
-                        default:   translated[index_out++] = '?';  break;
-                    }
-                    index_in += 2;
-                    break;
-
-                case -61: // 0xC3
-                    switch (ch) {
-                        case -67:  translated[index_out++] = 0x8d; break; // ý
-                        case -70:  translated[index_out++] = 0x8f; break; // ú
-                        case -77:  translated[index_out++] = 0x8e; break; // ó
-                        case -83:  translated[index_out++] = 0x8c; break; // í
-                        case -87:  translated[index_out++] = 0x8b; break; // é
-                        case -95:  translated[index_out++] = 0x95; break; // á
-                        case -99:  translated[index_out++] = 0x9c; break; // Ý
-                        case -102: translated[index_out++] = 0x9e; break; // Ú
-                        case -109: translated[index_out++] = 0x9d; break; // Ó
-                        case -115: translated[index_out++] = 0x9b; break; // Í
-                        case -119: translated[index_out++] = 0x9a; break; // É
-                        case -127: translated[index_out++] = 0x99; break; // Á
-                        case -65:  translated[index_out++] = 0x84; break; // ÿ
-                        case -68:  translated[index_out++] = 0x86; break; // ü
-                        case -74:  translated[index_out++] = 0x85; break; // ö
-                        case -81:  translated[index_out++] = 0x83; break; // ï
-                        case -85:  translated[index_out++] = 0x82; break; // ë
-                        case -92:  translated[index_out++] = 0x81; break; // ä
-                        case -100: translated[index_out++] = 0x89; break; // Ü
-                        case -106: translated[index_out++] = 0x88; break; // Ö
-                        case -113: translated[index_out++] = 0x83; break; // Ï
-                        case -117: translated[index_out++] = 0x82; break; // Ë
-                        case -124: translated[index_out++] = 0x87; break; // Ä
-                        default:   translated[index_out++] = '?';  break;
-                    }
-                    index_in += 2;
-                    break;
-
-                default:
-                    // Záchrana pro jiné neočekávané vícebajtové znaky
-                    translated[index_out++] = c;
-                    index_in++;
-                    break;
+                }
             }
+            if (!found) translated[index_out++] = '?';
+            index_in += 2;
         }
     }
-
     // Bezpečné ukončení řetězce přesně tam, kam se reálně dokreslil
     translated[index_out] = '\0';
     return translated;
 }
 
-// NEW
 void print (menu_t *menu, game_t * game, const char * string, int * y, int * x, int size, int color_index) {
 	int i = 0;
 	unsigned char c = 0;

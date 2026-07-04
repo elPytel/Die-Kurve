@@ -26,6 +26,18 @@ void player_init (player_t *player) {
 	player->old_vector.y = 0;
 }
 
+void bot_init (bot_t *bot) {
+	bot->alive = false;
+	bot->color = 0;
+	// pozice
+	bot->position.y = 0;
+	bot->position.x = 0;
+	// vektor
+	bot->vector.x = 0;
+	bot->vector.y = 0;
+	bot->direction = 0;
+}
+
 bool game_init (game_t * game) {
 	game->playing = false;
 	// hraci

@@ -53,6 +53,14 @@ typedef struct {
 	position_t old_vector;
 } player_t;
 
+typedef struct {
+	bool alive;
+	position_t position;
+	position_t vector;
+	uint16_t color;
+	int direction;
+} bot_t;
+
 /**
  * @brief game structure
  * 
