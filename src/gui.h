@@ -20,8 +20,12 @@ bool render_game (game_t * game);
  * @return true if rendering was successful, false otherwise.
  */
 bool render_menu (menu_t *menu, game_t * game);
-void render_score_bord (menu_t *menu, game_t * game);
-void render_logo (uint16_t * img);
+
+/**
+ * @brief Renders the logo on the display in graphical mode.
+ * @param img Pointer to the image data representing the logo.
+ */
+void logo_render (uint16_t * img);
 
 /**
  * @brief Translates a string to the appropriate character encoding for display.
@@ -38,11 +42,18 @@ unsigned char* translate(const char *string);
 void print_menu(menu_t *menu, game_t * game);
 
 /**
+ * @brief Renders the score board on the display in graphical mode.
+ * @param menu Pointer to the menu structure.
+ * @param game Pointer to the game structure.
+ */
+void score_bord_render (menu_t *menu, game_t * game);
+
+/**
  * @brief Prints the score board on the display in text mode.
  * @param menu Pointer to the menu structure.
  * @param game Pointer to the game structure.
  */
-void score_bord(menu_t *menu, game_t * game);
+void score_bord_print(menu_t *menu, game_t * game);
 
 // RGB to 16b color
 bool RBG_to_16b (color_t RGB, uint16_t *color);

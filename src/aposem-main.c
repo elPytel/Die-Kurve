@@ -121,10 +121,9 @@ int main() {
         frame_start = SDL_GetTicks();
         while (true) {
             pool_events();
-            score_bord(&menu, &game);
+            score_bord_print(&menu, &game);
 
-
-            render_score_bord(&menu, &game);
+            score_bord_render(&menu, &game);
             gui_render(WIDTH, HEIGHT, game.frame_buffer);
 
             if (DEBUG) {

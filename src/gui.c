@@ -224,7 +224,7 @@ char * num_to_str (int integer) {
 	return string;
 }
 
-void render_logo (uint16_t * img) {
+void logo_render (uint16_t * img) {
 	if (!img) {
 		fprintf(stderr, "ERROR: invalid img!\n");
 	}
@@ -363,7 +363,7 @@ bool render_menu (menu_t *menu, game_t * game) {
     return true;
 }
 
-void render_score_bord (menu_t *menu, game_t * game) {
+void score_bord_render (menu_t *menu, game_t * game) {
 	// projde pres vsechny hrace a boty a vypise jejich score
 	int size = menu->size;
 	int position = 0;
@@ -532,7 +532,7 @@ void print_menu(menu_t *menu, game_t * game) {
     }
 }
 
-void score_bord (menu_t *menu, game_t * game) {
+void score_bord_print (menu_t *menu, game_t * game) {
 	// terminal
 	if (DEBUG) {
 		// hraci
@@ -548,16 +548,16 @@ void score_bord (menu_t *menu, game_t * game) {
 
 //--- image.ppm ---------------------------------------------------------------
 
-bool RBG_to_16b (color_t RGB, uint16_t *color) {
-	 uint16_t mix = 0;
-	 //RED
-	 mix = mix | ( (uint16_t)RGB.R << 8 & 0b1111100000000000);
-	 //GREEN
-	 mix = mix | ( (uint16_t)RGB.G << 3 & 0b0000011111100000);
-	 //BLUE
-	 mix = mix | ( (uint16_t)RGB.B >> 3 & 0b0000000000011111);
-	 *color = mix;
-	 return true;
+bool RBG_to_16b(color_t RGB, uint16_t* color) {
+    uint16_t mix = 0;
+    // RED
+    mix = mix | ((uint16_t)RGB.R << 8 & 0b1111100000000000);
+    // GREEN
+    mix = mix | ((uint16_t)RGB.G << 3 & 0b0000011111100000);
+    // BLUE
+    mix = mix | ((uint16_t)RGB.B >> 3 & 0b0000000000011111);
+    *color = mix;
+    return true;
 }
 
 bool open_img (char * file_name, unsigned char ** img) {

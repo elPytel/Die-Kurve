@@ -216,7 +216,7 @@ void menu_function (menu_t * menu, game_t * game) {
 			break;
 	}
 	
-	render_logo(game->logo);
+	logo_render(game->logo);
 	print_menu(menu, game);
 	render_menu(menu, game);
 	

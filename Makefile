@@ -70,6 +70,7 @@ zip:
 
 clean:
 	rm -f  install
+	rm -f  *.log
 	rm -f  ${HW}-brute.zip
 	rm -rf ${DOC_DIR}
 	rm -rf ${BUILD_DIR}
