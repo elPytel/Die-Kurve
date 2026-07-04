@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 #include "../src/font_types.h"
 
 void test_font_table() {

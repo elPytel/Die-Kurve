@@ -11,7 +11,6 @@
 #include <time.h> 
 
 #define MAX_PLAYERS 3
-#define MAX_BOTS 10
 
 /**
  * @brief color structure
@@ -52,14 +51,6 @@ typedef struct {
 	position_t vector; /**< movement in x and y directions */
 	position_t old_vector;
 } player_t;
-
-typedef struct {
-	bool alive;
-	position_t position;
-	position_t vector;
-	uint16_t color;
-	int direction;
-} bot_t;
 
 /**
  * @brief game structure
@@ -133,6 +124,10 @@ int game_calculate_score(game_t * game);
 void game_free (game_t * game);
 
 void game_kill_all (game_t * game);
+
+
+void right(int *dy, int *dx);
+void left(int *dy, int *dx);
 
 #endif
 /* end of game.h */

@@ -26,18 +26,6 @@ void player_init (player_t *player) {
 	player->old_vector.y = 0;
 }
 
-void bot_init (bot_t *bot) {
-	bot->alive = false;
-	bot->color = 0;
-	// pozice
-	bot->position.y = 0;
-	bot->position.x = 0;
-	// vektor
-	bot->vector.x = 0;
-	bot->vector.y = 0;
-	bot->direction = 0;
-}
-
 bool game_init (game_t * game) {
 	game->playing = false;
 	// hraci
@@ -645,32 +633,4 @@ void game_kill_all (game_t * game) {
 	}
 }
 
-/*
-void degree_to_vector (int degree, int *y, int *x) {
-	if ( degree < 16 || degree >= 239 ) {
-		*y = -1;
-		*x = 0;
-	} else if ( degree < 48 && degree >= 16 ) {
-		*y = -1;
-		*x = -1;
-	} else if ( degree < 80 && degree >= 48 ) {
-		*y = 0;
-		*x = -1;
-	} else if ( degree < 112 && degree >= 80 ) {
-		*y = 1;
-		*x = -1;
-	} else if ( degree < 144 && degree >= 112 ) {
-		*y = 1;
-		*x = 0;
-	} else if ( degree < 176 && degree >= 144 ) {
-		*y = 1;
-		*x = 1;
-	} else if ( degree < 208 && degree >= 176 ) {
-		*y = 0;
-		*x = 1;
-	} else if ( degree < 239 && degree >= 208 ) {
-		*y = -1;
-		*x = 1;
-	}
-}*/
 /* end of game.c */

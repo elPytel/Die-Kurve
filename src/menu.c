@@ -138,6 +138,7 @@ void X_menu_position (menu_t * menu) {
 		menu->x_shift = -1;
 	}
 }
+
 void menu_function (menu_t * menu, game_t * game) {
     bool restart = false;
 	menu->x_shift = 0;

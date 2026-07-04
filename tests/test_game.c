@@ -35,3 +35,60 @@ void test_player_init() {
     
     game_kill_all(&game);
 }
+
+void test_rotate_right() { // o 45 stupnu v ctvercove siti
+    int y = 1, x = 0; // směrem J
+    right(&y, &x);
+    // JZ
+    assert(y == 1 && x == -1);
+    right(&y, &x);
+    // Z
+    assert(y == 0 && x == -1);
+    right(&y, &x);
+    // SZ
+    assert(y == -1 && x == -1);
+    right(&y, &x);
+    // S
+    assert(y == -1 && x == 0);
+    right(&y, &x);
+    // SV
+    assert(y == -1 && x == 1);
+    right(&y, &x);
+    // V
+    assert(y == 0 && x == 1);
+    right(&y, &x);
+    // JV
+    assert(y == 1 && x == 1);
+    right(&y, &x);
+    // J
+    assert(y == 1 && x == 0);
+    
+}
+
+void test_rotate_left() {
+    int y = 1, x = 0; // směrem dolů
+    left(&y, &x);
+    // JV
+    assert(y == 1 && x == 1);
+    left(&y, &x);
+    // V
+    assert(y == 0 && x == 1);
+    left(&y, &x);
+    // SV
+    assert(y == -1 && x == 1);
+    left(&y, &x);
+    // S
+    assert(y == -1 && x == 0);
+    left(&y, &x);
+    // SZ
+    assert(y == -1 && x == -1);
+    left(&y, &x);
+    // Z
+    assert(y == 0 && x == -1);
+    left(&y, &x);
+    // JZ
+    assert(y == 1 && x == -1);
+    left(&y, &x);
+    // J
+    assert(y == 1 && x == 0);
+}
